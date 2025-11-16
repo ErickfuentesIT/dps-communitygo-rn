@@ -1,0 +1,112 @@
+[
+  {
+    "id": "post_001",
+    "user": {
+      "id": "user_123",
+      "username": "codewithleo",
+      "profilePictureUrl": "https://i.pravatar.cc/48"
+    },
+    "media": [
+      {
+        "id": "media_001",
+        "type": "image",
+        "url": "https://example.com/images/post_image_1.jpg"
+      }
+    ],
+    "caption": "¡Mi primer post en esta app! Creando un clon de Instagram con React Native. 🚀 #reactnative #coding #dev",
+    "location": "Santa Tecla, El Salvador",
+    "stats": {
+      "likeCount": 124,
+      "commentCount": 12
+    },
+    "userInteraction": {
+      "isLiked": true,
+      "isBookmarked": false
+    },
+    "commentPreview": [
+      {
+        "id": "comment_001",
+        "user": {
+          "username": "janedoe"
+        },
+        "text": "¡Excelente trabajo! Se ve genial."
+      }
+    ],
+    "createdAt": "2025-11-15T19:30:00Z"
+  },
+  {
+    "id": "post_002",
+    "user": {
+      "id": "user_456",
+      "username": "travelgram",
+      "profilePictureUrl": "https://i.pravatar.cc/48"
+    },
+    "media": [
+      {
+        "id": "media_002",
+        "type": "image",
+        "url": "https://example.com/images/post_image_2.jpg"
+      },
+      {
+        "id": "media_003",
+        "type": "image",
+        "url": "https://example.com/images/post_image_3.jpg"
+      }
+    ],
+    "caption": "Un carrusel de mi viaje al volcán. ¡Increíble!",
+    "location": "Volcán de Santa Ana",
+    "stats": {
+      "likeCount": 2048,
+      "commentCount": 88
+    },
+    "userInteraction": {
+      "isLiked": false,
+      "isBookmarked": true
+    },
+    "commentPreview": [
+      {
+        "id": "comment_002",
+        "user": {
+          "username": "codewithleo"
+        },
+        "text": "¡Qué fotazas!"
+      },
+      {
+        "id": "comment_003",
+        "user": {
+          "username": "hiker_guy"
+        },
+        "text": "¿Qué tan dura es la subida?"
+      }
+    ],
+    "createdAt": "2025-11-15T18:15:00Z"
+  },
+  {
+    "id": "post_003",
+    "user": {
+      "id": "user_789",
+      "username": "foodie_sv",
+      "profilePictureUrl": "https://i.pravatar.cc/48"
+    },
+    "media": [
+      {
+        "id": "media_004",
+        "type": "video",
+        "url": "https://example.com/videos/pupusas.mp4",
+        "thumbnailUrl": "https://example.com/images/video_thumb.jpg"
+      }
+    ],
+    "caption": "¡Un video rápido de cómo se hacen!",
+    "location": "Olocuilta, La Paz",
+    "stats": {
+      "likeCount": 987,
+      "commentCount": 42
+    },
+    "userInteraction": {
+      "isLiked": false,
+      "isBookmarked": false
+    },
+    "commentPreview": [],
+    "createdAt": "2025-11-14T12:00:00Z"
+  }
+]

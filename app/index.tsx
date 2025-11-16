@@ -1,9 +1,12 @@
-import { useRouter } from "expo-router";
-import { StyleSheet, View } from "react-native";
-
 import CustomButton from "@/components/UI/CustomButtom";
+import CustomText from "@/components/UI/CustomText";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { View } from "react-native";
+import useIndexStyles from "./index.styles";
 
 export default function WelcomeScreen() {
+  const styles = useIndexStyles();
   const router = useRouter();
 
   function goToLogin() {
@@ -15,48 +18,37 @@ export default function WelcomeScreen() {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#1E2A38",
-      }}
-    >
-      {/* <Text></Text> */}
-      <View
-        style={{
-          flex: 1,
-          gap: 20,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+    <View style={styles.container}>
+      <Image
+        source={require("../assets/images/ComunityGo.png")}
+        style={styles.logo}
+        contentFit="contain"
+      />
+      <View style={styles.titleContainer}>
+        <CustomText variant="displayMedium" style={styles.title}>
+          Bienvenido
+        </CustomText>
+      </View>
+      <View style={styles.btnContainer}>
         <CustomButton
           mode="contained"
           buttonColor="#007BFF"
           textColor="#fff"
-          style={styles.general}
+          style={styles.btnGeneral}
           onPress={goToLogin}
         >
-          Iniciar Sesión
+          INICIAR SESIÓN
         </CustomButton>
         <CustomButton
           mode="contained"
           buttonColor="#fff"
           textColor="#000"
-          style={styles.general}
+          style={styles.btnGeneral}
           onPress={goToRegister}
         >
-          Registrarse
+          REGISTRARSE
         </CustomButton>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  general: {
-    width: 300,
-  },
-});
