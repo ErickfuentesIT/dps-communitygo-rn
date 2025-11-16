@@ -1,38 +1,39 @@
 import * as React from "react";
 import { BottomNavigation, Text } from "react-native-paper";
 
-const MusicRoute = () => <Text>Music</Text>;
+const MyEventsRoute = () => <Text>Eventos</Text>;
 
-const AlbumsRoute = () => <Text>Albums</Text>;
+const HomeRoute = () => <Text>Inicio</Text>;
 
-const RecentsRoute = () => <Text>Recents</Text>;
-
-const NotificationsRoute = () => <Text>Notifications</Text>;
+const AccountRoute = () => <Text>Cuenta</Text>;
 
 function NavigationBar() {
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
     {
-      key: "music",
-      title: "Favorites",
-      focusedIcon: "heart",
-      unfocusedIcon: "heart-outline",
+      key: "events",
+      title: "Mis Eventos",
+      focusedIcon: "bookmark",
+      unfocusedIcon: "bookmark-outline",
     },
-    { key: "albums", title: "Albums", focusedIcon: "album" },
-    { key: "recents", title: "Recents", focusedIcon: "history" },
     {
-      key: "notifications",
-      title: "Notifications",
-      focusedIcon: "bell",
-      unfocusedIcon: "bell-outline",
+      key: "home",
+      title: "Inicio",
+      focusedIcon: "home",
+      unfocusedIcon: "home-outline",
+    },
+    {
+      key: "account",
+      title: "Cuenta",
+      focusedIcon: "account-circle",
+      unfocusedIcon: "account-circle-outline",
     },
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
-    music: MusicRoute,
-    albums: AlbumsRoute,
-    recents: RecentsRoute,
-    notifications: NotificationsRoute,
+    events: MyEventsRoute,
+    home: HomeRoute,
+    account: AccountRoute,
   });
 
   return (

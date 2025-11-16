@@ -18,7 +18,7 @@ export default function Login() {
   const router = useRouter();
 
   function goToHome() {
-    router.push("/home");
+    router.push("/(app)/home");
   }
 
   function goToLogin() {

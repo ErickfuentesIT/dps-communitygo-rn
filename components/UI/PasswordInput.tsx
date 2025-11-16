@@ -1,6 +1,6 @@
 import React from "react";
 import { TextInput } from "react-native-paper";
-import useLoginStyles from "./../../app/login.styles";
+import useLoginStyles from "../../app/(auth)/login.styles";
 
 interface IPasswordInput {
   password: string;
