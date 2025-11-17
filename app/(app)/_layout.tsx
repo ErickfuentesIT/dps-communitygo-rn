@@ -1,6 +1,6 @@
 import { useUIStore } from "@/store/useUIStore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs, usePathname, useRouter } from "expo-router";
 import React from "react";
 import { AnimatedFAB, Portal, useTheme } from "react-native-paper";
 import useHomeStyles from "./../../styles/home.styles";
@@ -8,9 +8,13 @@ import useHomeStyles from "./../../styles/home.styles";
 export default function AppLayout() {
   const theme = useTheme(); // 2. Obtén tu tema
   const router = useRouter();
+  const pathname = usePathname();
   const isFabExtended = useUIStore((state) => state.isFabExtended);
   const isCreatingEvent = useUIStore((state) => state.isCreatingEvent);
   const setIsCreatingEvent = useUIStore((state) => state.setIsCreatingEvent);
+
+  const isFabVisible =
+    pathname.includes("profile") || pathname.includes("/create-event");
 
   const styles = useHomeStyles();
   const onCrearEvento = () => {
@@ -74,20 +78,18 @@ export default function AppLayout() {
           }}
         />
       </Tabs>
-      {!isCreatingEvent && (
-        <Portal>
-          <AnimatedFAB
-            icon="plus"
-            label="Crear Evento"
-            extended={isFabExtended}
-            onPress={onCrearEvento}
-            visible={true}
-            animateFrom="right"
-            iconMode="static"
-            style={styles.fabStyle}
-          />
-        </Portal>
-      )}
+      <Portal>
+        <AnimatedFAB
+          icon="plus"
+          label="Crear Evento"
+          extended={isFabExtended}
+          onPress={onCrearEvento}
+          visible={!isFabVisible}
+          animateFrom="right"
+          iconMode="static"
+          style={styles.fabStyle}
+        />
+      </Portal>
     </>
   );
 }

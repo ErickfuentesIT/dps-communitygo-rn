@@ -1,26 +1,123 @@
 [
   {
-    "id": "post_001",
+    "id": "post_002",
+    "title": "Taller de React Native ⚛️",
+    "eventDate": "2025-12-05T09:00:00.000Z",
+    "location": "WeWork, San Salvador",
+    "caption": "¡Mi primer post en esta app! Creando un clon de Instagram con React Native. 🚀 #reactnative #coding #dev",
+    "description": "Acompáñanos en este taller intensivo para principiantes. Aprenderemos Hooks, Navegación y Estilos. ¡Trae tu laptop!",
     "user": {
-      "id": "user_123",
-      "username": "codewithleo",
-      "profilePictureUrl": "https://i.pravatar.cc/48"
+      "id": "user_456",
+      "username": "dev_community_sv",
+      "profilePictureUrl": "https://i.pravatar.cc/150?img=11"
     },
     "media": [
       {
-        "id": "media_001",
+        "id": "media_002",
         "type": "image",
-        "url": "https://example.com/images/post_image_1.jpg"
+        "url": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80"
       }
     ],
     "stats": {
-      "likeCount": 124,
-      "commentCount": 12
+      "likeCount": 342,
+      "commentCount": 45
+    },
+    "userInteraction": {
+      "isLiked": false,
+      "isBookmarked": true
+    },
+    "createdAt": "2025-11-16T10:00:00Z"
+  },
+  {
+    "id": "post_003",
+    "title": "Caminata al Volcán 🌋",
+    "eventDate": "2025-12-12T06:00:00.000Z",
+    "location": "Volcán Ilamatepec",
+    "caption": "¡Mi primer post en esta app! Creando un clon de Instagram con React Native. 🚀 #reactnative #coding #dev",
+    "description": "Salida grupal para subir el volcán de Santa Ana. Nivel intermedio. Llevar agua y ropa cómoda.",
+    "user": {
+      "id": "user_789",
+      "username": "exploradores_sv",
+      "profilePictureUrl": "https://i.pravatar.cc/150?img=60"
+    },
+    "media": [
+      {
+        "id": "media_003",
+        "type": "image",
+        "url": "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&q=80"
+      }
+    ],
+    "stats": {
+      "likeCount": 890,
+      "commentCount": 120
+    },
+    "userInteraction": {
+      "isLiked": true,
+      "isBookmarked": true
+    },
+    "createdAt": "2025-11-14T08:30:00Z"
+  },
+  {
+    "id": "post_004",
+    "title": "Feria Gastronómica 🌮",
+    "eventDate": "2025-12-20T12:00:00.000Z",
+    "location": "Parque Cuscatlán",
+    "caption": "¡Mi primer post en esta app! Creando un clon de Instagram con React Native. 🚀 #reactnative #coding #dev",
+    "description": "Ven a disfrutar de los mejores platillos locales. Habrá música en vivo y juegos para niños. Entrada libre.",
+    "user": {
+      "id": "user_101",
+      "username": "foodie_events",
+      "profilePictureUrl": "https://i.pravatar.cc/150?img=33"
+    },
+    "media": [
+      {
+        "id": "media_004",
+        "type": "image",
+        "url": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80"
+      },
+      {
+        "id": "media_005",
+        "type": "image",
+        "url": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80"
+      }
+    ],
+    "stats": {
+      "likeCount": 56,
+      "commentCount": 2
+    },
+    "userInteraction": {
+      "isLiked": false,
+      "isBookmarked": false
+    },
+    "createdAt": "2025-11-17T09:15:00Z"
+  },
+  {
+    "id": "post_005",
+    "title": "Noche de Cine: Clásicos 🎬",
+    "eventDate": "2025-12-02T19:30:00.000Z",
+    "location": "Centro Cívico Cultural",
+    "caption": "¡Mi primer post en esta app! Creando un clon de Instagram con React Native. 🚀 #reactnative #coding #dev",
+    "description": "Proyección de 'Cinema Paradiso' al aire libre. Venta de palomitas y bebidas. ¡No te lo pierdas!",
+    "user": {
+      "id": "user_202",
+      "username": "cineclub_arte",
+      "profilePictureUrl": "https://i.pravatar.cc/150?img=5"
+    },
+    "media": [
+      {
+        "id": "media_006",
+        "type": "image",
+        "url": "https://images.unsplash.com/photo-1517604931442-71053e6e2619?w=800&q=80"
+      }
+    ],
+    "stats": {
+      "likeCount": 128,
+      "commentCount": 15
     },
     "userInteraction": {
       "isLiked": true,
       "isBookmarked": false
     },
-    "createdAt": "2025-11-15T19:30:00Z"
+    "createdAt": "2025-11-16T18:45:00Z"
   }
 ]

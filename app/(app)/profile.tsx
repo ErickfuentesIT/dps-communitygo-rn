@@ -1,6 +1,8 @@
+import { useUIStore } from "@/store/useUIStore";
+import { theme } from "@/styles/theme";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -8,22 +10,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  Avatar,
-  Button,
-  Divider,
-  List,
-  Switch,
-  Text,
-  useTheme,
-} from "react-native-paper";
+import { Avatar, Button, Divider, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const theme = useTheme();
   const router = useRouter();
-
-  // Datos simulados del usuario
   const [userImage, setUserImage] = useState<string | null>(null);
   const userData = {
     name: "Juan Perez",
@@ -34,11 +26,10 @@ export default function ProfileScreen() {
 
   // --- Función para subir/cambiar imagen ---
   const pickImage = async () => {
-    // Pedir permisos y abrir galería
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1], // Importante: 1:1 para que sea cuadrada perfecta para el círculo
+      aspect: [1, 1],
       quality: 1,
     });
 
@@ -54,19 +45,15 @@ export default function ProfileScreen() {
       {
         text: "Salir",
         style: "destructive",
-        onPress: () => router.replace("/(auth)/login"), // Redirige al login
+        onPress: () => router.replace("/(auth)/login"),
       },
     ]);
   };
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
+    <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* 1. Encabezado con Logo (Simulado con texto o icono por ahora) */}
         <View style={styles.header}>
-          {/* Aquí iría tu Logo <Image source={...} /> */}
           <Text
             variant="titleLarge"
             style={{ color: theme.colors.primary, fontWeight: "bold" }}
@@ -89,7 +76,6 @@ export default function ProfileScreen() {
               />
             )}
 
-            {/* Icono pequeño de "editar" superpuesto */}
             <View
               style={[
                 styles.editBadge,
@@ -120,22 +106,6 @@ export default function ProfileScreen() {
         </View>
 
         <Divider style={styles.divider} />
-
-        {/* 4. Opciones Adicionales (Sugerencias) */}
-        <List.Section>
-          <List.Subheader>Configuración</List.Subheader>
-          <List.Item
-            title="Modo Oscuro"
-            left={() => <List.Icon icon="theme-light-dark" />}
-            right={() => <Switch value={false} onValueChange={() => {}} />}
-          />
-          <List.Item
-            title="Notificaciones"
-            left={() => <List.Icon icon="bell-outline" />}
-            right={() => <List.Icon icon="chevron-right" />}
-            onPress={() => {}}
-          />
-        </List.Section>
 
         {/* 5. Botón de Cerrar Sesión */}
         <Button
@@ -186,7 +156,7 @@ const InfoItem = ({
 );
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: theme.colors.background },
   scrollContent: { paddingBottom: 40 },
   header: {
     padding: 20,
@@ -223,6 +193,6 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     margin: 20,
-    borderColor: "red",
+    borderColor: theme.colors.error,
   },
 });

@@ -1,4 +1,4 @@
-import dataPosts from "@/data/events.json"; // Tu JSON inicial
+import dataPosts from "@/data/feedPosts.json"; // Tu JSON inicial
 import { Post } from "@/types/Post";
 import { create } from "zustand";
 

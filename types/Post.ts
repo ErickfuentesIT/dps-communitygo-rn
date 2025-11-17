@@ -43,6 +43,8 @@ export interface CommentPreview {
 // --- La Interfaz Principal del Post ---
 export interface Post {
   id: string;
+  title: string;
+  eventDate: string;
   user: PostUser;
   media: PostMedia[]; // Un array de objetos PostMedia
   caption: string;

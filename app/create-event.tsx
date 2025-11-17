@@ -3,7 +3,7 @@ import { useUIStore } from "@/store/useUIStore";
 import { theme } from "@/styles/theme";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -13,84 +13,118 @@ import {
 } from "react-native";
 import { Button, Text, TextInput, useTheme } from "react-native-paper";
 
+// 1. IMPORTAR LIBRERÍA DE FECHAS
+import { DatePickerInput, TimePickerModal } from "react-native-paper-dates";
+// IMPORTANTE: Registra el locale si lo necesitas en español (en _layout.tsx idealmente)
+// import { es } from 'react-native-paper-dates';
+// registerTranslation('es', es);
+
 export default function CreateEventScreen() {
   const theme = useTheme();
   const router = useRouter();
-
-  // --- Estados del Formulario ---
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  // Para fecha/hora simplificado (idealmente usarías librerías de DatePicker)
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [image, setImage] = useState<string | null>(null);
-
   const setIsCreatingEvent = useUIStore((state) => state.setIsCreatingEvent);
 
-  // --- Función para seleccionar imagen ---
+  // Estados
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [details, setDetails] = useState("");
+  const [location, setLocation] = useState("");
+  const [image, setImage] = useState<string | null>(null);
+
+  // --- ESTADOS DE FECHA Y HORA ---
+  const [inputDate, setInputDate] = useState<Date | undefined>(new Date());
+  const [visibleTime, setVisibleTime] = useState(false);
+  const [time, setTime] = useState<{ hours: number; minutes: number }>({
+    hours: 12,
+    minutes: 0,
+  });
+
+  // --- MANEJO DE HORA ---
+  const onDismissTime = useCallback(() => {
+    setVisibleTime(false);
+  }, []);
+
+  const onConfirmTime = useCallback(
+    ({ hours, minutes }: { hours: number; minutes: number }) => {
+      setVisibleTime(false);
+      setTime({ hours, minutes });
+    },
+    []
+  );
+
+  // --- MANEJO DE SUBMIT Y CANCEL ---
+  const handleSubmit = () => {
+    // Combinar fecha y hora
+    const finalDate = inputDate || new Date();
+    finalDate.setHours(time.hours);
+    finalDate.setMinutes(time.minutes);
+
+    console.log({ title, description, location, fullDate: finalDate, image });
+    setIsCreatingEvent(false);
+    router.back();
+  };
+
+  const handleCancel = () => {
+    setIsCreatingEvent(false);
+    router.back();
+  };
+
+  // --- IMAGEN ---
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [16, 9], // Formato apaisado tipo evento
+      aspect: [16, 9],
       quality: 1,
     });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
-  };
-
-  // --- Función de Envío ---
-  const handleSubmit = () => {
-    // Aquí iría tu lógica para conectar con Zustand o tu API
-    console.log({ title, description, location, date, time, image });
-    setIsCreatingEvent(false);
-    router.back(); // Volver atrás
-  };
-  const handleCancel = () => {
-    // Aquí iría tu lógica para conectar con Zustand o tu API
-    setIsCreatingEvent(false);
-    router.back(); // Volver atrás
+    if (!result.canceled) setImage(result.assets[0].uri);
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.scrollContent}
-      // style={{ backgroundColor: theme.colors.background }}
-    >
+    <ScrollView contentContainerStyle={styles.scrollContent}>
       <Header />
       <Text variant="headlineMedium" style={styles.header}>
         ¿Qué tienes en mente?
       </Text>
-      <Text variant="bodyMedium" style={{ color: "gray", marginBottom: 20 }}>
-        Comparte tu próximo evento con la comunidad.
+      <Text variant="labelLarge" style={styles.labelHeader}>
+        Comparte tu evento con la comunidad
       </Text>
+      {/* --- TITULO --- */}
 
-      {/* 1. Título */}
       <TextInput
         label="Título del evento"
         value={title}
         onChangeText={setTitle}
         mode="outlined"
-        textColor={theme.colors.onTertiary}
         style={styles.input}
+        textColor={theme.colors.onTertiary}
       />
 
-      {/* 2. Descripción (Multiline) */}
+      {/* --- DESCRIPCION --- */}
       <TextInput
-        label="Descripción detallada"
+        label="Descripción"
         value={description}
+        textColor={theme.colors.onTertiary}
         onChangeText={setDescription}
         mode="outlined"
         multiline
-        numberOfLines={4}
-        textColor={theme.colors.onTertiary}
+        numberOfLines={2}
         style={styles.input}
       />
 
-      {/* 3. Ubicación */}
+      {/* --- DETALLES EVENTO --- */}
+      <TextInput
+        label="Detalles evento"
+        value={details}
+        textColor={theme.colors.onTertiary}
+        onChangeText={setDetails}
+        mode="outlined"
+        multiline
+        numberOfLines={4}
+        style={styles.input}
+      />
+
+      {/* --- LOCALIZACION --- */}
       <TextInput
         label="Ubicación"
         value={location}
@@ -101,45 +135,58 @@ export default function CreateEventScreen() {
         right={<TextInput.Icon icon="map-marker" />}
       />
 
-      {/* 4. Fila de Fecha y Hora */}
+      {/* --- FECHA Y HORA --- */}
       <View style={styles.row}>
-        <TextInput
-          label="Fecha"
-          value={date}
-          onChangeText={setDate}
-          placeholder="DD/MM/AAAA"
-          mode="outlined"
-          style={[styles.input, styles.halfInput]}
-          textColor={theme.colors.onTertiary}
-          right={<TextInput.Icon icon="calendar" />}
-          keyboardType="numeric" // Simplificación
-        />
-        <View style={{ width: 10 }} /> {/* Espaciador */}
-        <TextInput
-          label="Hora"
-          value={time}
-          onChangeText={setTime}
-          placeholder="00:00"
-          mode="outlined"
-          style={[styles.input, styles.halfInput]}
-          right={<TextInput.Icon icon="clock-outline" />}
-          textColor={theme.colors.onTertiary}
-          keyboardType="numeric" // Simplificación
-        />
+        {/* INPUT DE FECHA  */}
+        <View style={styles.halfInput}>
+          <DatePickerInput
+            locale="es"
+            label="Fecha"
+            value={inputDate}
+            onChange={(d) => setInputDate(d)}
+            inputMode="start"
+            mode="outlined"
+            textColor={theme.colors.onTertiary}
+            style={{ backgroundColor: theme.colors.onBackground }} // Tu estilo de fondo
+          />
+        </View>
+
+        <View style={{ width: 10 }} />
+
+        {/*INPUT DE HORA */}
+        <View style={styles.halfInput}>
+          <TextInput
+            label="Hora"
+            value={`${time.hours.toString().padStart(2, "0")}:${time.minutes
+              .toString()
+              .padStart(2, "0")}`}
+            mode="outlined"
+            textColor={theme.colors.onTertiary}
+            right={
+              <TextInput.Icon
+                icon="clock-outline"
+                onPress={() => setVisibleTime(true)}
+              />
+            }
+            editable={false} // No escribir, solo tocar
+            onPressIn={() => setVisibleTime(true)}
+            style={{ backgroundColor: theme.colors.onBackground }}
+          />
+          {/* MODAL HORA */}
+          <TimePickerModal
+            visible={visibleTime}
+            onDismiss={onDismissTime}
+            onConfirm={onConfirmTime}
+            hours={time.hours}
+            minutes={time.minutes}
+            label="Seleccionar hora"
+            cancelLabel="Cancelar"
+            confirmLabel="Ok"
+          />
+        </View>
       </View>
 
-      {/* 5. Selector de Imagen (Visualmente mejorado) */}
-      <Text
-        variant="titleMedium"
-        style={{
-          marginTop: 10,
-          marginBottom: 5,
-          color: theme.colors.onTertiary,
-        }}
-      >
-        Imagen del evento
-      </Text>
-
+      {/* --- SELECTOR DE IMAGEN --- */}
       <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
         {image ? (
           <Image source={{ uri: image }} style={styles.imagePreview} />
@@ -156,18 +203,12 @@ export default function CreateEventScreen() {
           </View>
         )}
       </TouchableOpacity>
-      {image && (
-        <Button mode="text" onPress={() => setImage(null)} compact>
-          Eliminar foto
-        </Button>
-      )}
 
-      {/* 6. Botón de Acción */}
+      {/* BOTONES */}
       <Button
         mode="contained"
         onPress={handleSubmit}
         style={styles.submitButton}
-        contentStyle={{ height: 50 }} // Botón más alto y fácil de tocar
       >
         Publicar Evento
       </Button>
@@ -175,7 +216,6 @@ export default function CreateEventScreen() {
         mode="outlined"
         onPress={handleCancel}
         style={styles.submitButton}
-        contentStyle={{ height: 50 }} // Botón más alto y fácil de tocar
       >
         Cancelar
       </Button>
@@ -184,48 +224,37 @@ export default function CreateEventScreen() {
 }
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 50,
-  },
+  scrollContent: { padding: 20, paddingBottom: 50 },
   header: {
     fontWeight: "bold",
     marginBottom: 5,
     color: theme.colors.onTertiary,
   },
+  labelHeader: {
+    color: theme.colors.onSurfaceVariant,
+    marginBottom: 5,
+  },
   input: {
     marginBottom: 16,
-    backgroundColor: theme.colors.onSecondary,
+    backgroundColor: theme.colors.onBackground,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginBottom: 16,
   },
-  halfInput: {
-    flex: 1,
-  },
+  halfInput: { flex: 1 }, // Importante para que DatePickerInput ocupe el espacio
   imageContainer: {
     width: "100%",
     height: 200,
     borderRadius: 12,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#000",
-    borderStyle: "dashed", // Borde punteado para indicar "zona de carga"
+    borderStyle: "dashed",
     marginBottom: 10,
+    borderColor: "#ccc",
   },
-  imagePlaceholder: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  imagePreview: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-  submitButton: {
-    marginTop: 20,
-    borderRadius: 8,
-  },
+  imagePlaceholder: { flex: 1, justifyContent: "center", alignItems: "center" },
+  imagePreview: { width: "100%", height: "100%", resizeMode: "cover" },
+  submitButton: { marginTop: 10, borderRadius: 8 },
 });
