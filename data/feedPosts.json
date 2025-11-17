@@ -1,0 +1,26 @@
+[
+  {
+    "id": "post_001",
+    "user": {
+      "id": "user_123",
+      "username": "codewithleo",
+      "profilePictureUrl": "https://i.pravatar.cc/48"
+    },
+    "media": [
+      {
+        "id": "media_001",
+        "type": "image",
+        "url": "https://example.com/images/post_image_1.jpg"
+      }
+    ],
+    "stats": {
+      "likeCount": 124,
+      "commentCount": 12
+    },
+    "userInteraction": {
+      "isLiked": true,
+      "isBookmarked": false
+    },
+    "createdAt": "2025-11-15T19:30:00Z"
+  }
+]

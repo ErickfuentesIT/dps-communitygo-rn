@@ -8,9 +8,23 @@ export default function useHomeStyles() {
   return StyleSheet.create({
     container: {
       flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: theme.colors.onSecondary,
+    },
+    listContent: {
+      padding: 0,
+      gap: 10,
+    },
+    logo: {
+      aspectRatio: 16 / 9,
+      width: screenWidth * 0.25,
+      height: "auto",
+      margin: 3,
+    },
+    fabStyle: {
+      position: "absolute",
+      margin: 32,
+      right: 0,
+      bottom: 50,
+      backgroundColor: theme.colors.primary,
     },
   });
 }
