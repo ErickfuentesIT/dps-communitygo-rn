@@ -8,6 +8,7 @@ interface PostsState {
   toggleLike: (postId: string) => void;
   toggleBookmark: (postId: string) => void;
   addPost: (post: Post) => void;
+  toggleAttendance: (postId: string) => void;
 }
 
 export const usePostsStore = create<PostsState>((set) => ({
@@ -55,5 +56,26 @@ export const usePostsStore = create<PostsState>((set) => ({
   addPost: (newPost) =>
     set((state) => ({
       posts: [newPost, ...state.posts],
+    })),
+
+  toggleAttendance: (postId) =>
+    set((state) => ({
+      posts: state.posts.map((post) => {
+        if (post.id === postId) {
+          const isAttending = !post.userInteraction.isAttending;
+          return {
+            ...post,
+            stats: {
+              ...post.stats,
+              // Aumenta o disminuye el contador total
+              attendanceCount: isAttending
+                ? post.stats.attendanceCount + 1
+                : post.stats.attendanceCount - 1,
+            },
+            userInteraction: { ...post.userInteraction, isAttending },
+          };
+        }
+        return post;
+      }),
     })),
 }));

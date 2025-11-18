@@ -1,6 +1,8 @@
 import Header from "@/components/UI/Header";
+import { usePostsStore } from "@/store/usePostsStore";
 import { useUIStore } from "@/store/useUIStore";
 import { theme } from "@/styles/theme";
+import { Post } from "@/types/Post";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
@@ -23,6 +25,7 @@ export default function CreateEventScreen() {
   const theme = useTheme();
   const router = useRouter();
   const setIsCreatingEvent = useUIStore((state) => state.setIsCreatingEvent);
+  const addPost = usePostsStore((state) => state.addPost);
 
   // Estados
   const [title, setTitle] = useState("");
@@ -59,7 +62,37 @@ export default function CreateEventScreen() {
     finalDate.setHours(time.hours);
     finalDate.setMinutes(time.minutes);
 
-    console.log({ title, description, location, fullDate: finalDate, image });
+    const newPost: Post = {
+      id: crypto.randomUUID.toString(),
+      title: title,
+      eventDate: finalDate.toISOString(),
+      location: location,
+      caption: description,
+      details: details,
+      user: {
+        id: "1",
+        username: "user1",
+        profilePictureUrl:
+          "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80",
+      },
+      media: {
+        id: `media_${Date.now()}`,
+        type: "image",
+        url: image,
+      },
+      stats: {
+        likeCount: 0,
+        commentCount: 0,
+      },
+      userInteraction: {
+        isLiked: false,
+        isBookmarked: false,
+      },
+      createdAt: new Date().toISOString(),
+    };
+
+    console.log("Enviando Post:", newPost);
+    addPost(newPost);
     setIsCreatingEvent(false);
     router.back();
   };

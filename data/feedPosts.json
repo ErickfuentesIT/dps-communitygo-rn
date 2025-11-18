@@ -5,28 +5,53 @@
     "eventDate": "2025-12-05T09:00:00.000Z",
     "location": "WeWork, San Salvador",
     "caption": "¡Mi primer post en esta app! Creando un clon de Instagram con React Native. 🚀 #reactnative #coding #dev",
-    "description": "Acompáñanos en este taller intensivo para principiantes. Aprenderemos Hooks, Navegación y Estilos. ¡Trae tu laptop!",
+    "details": "Acompáñanos en este taller intensivo para principiantes. Aprenderemos Hooks, Navegación y Estilos. ¡Trae tu laptop!",
     "user": {
       "id": "user_456",
       "username": "dev_community_sv",
       "profilePictureUrl": "https://i.pravatar.cc/150?img=11"
     },
-    "media": [
-      {
-        "id": "media_002",
-        "type": "image",
-        "url": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80"
-      }
-    ],
+    "media": {
+      "id": "media_002",
+      "type": "image",
+      "url": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80"
+    },
     "stats": {
       "likeCount": 342,
-      "commentCount": 45
+      "commentCount": 3
     },
     "userInteraction": {
       "isLiked": false,
       "isBookmarked": true
     },
-    "createdAt": "2025-11-16T10:00:00Z"
+    "createdAt": "2025-11-16T10:00:00Z",
+    "comments": [
+      {
+        "id": "c_001",
+        "profilePictureUrl": "https://i.pravatar.cc/150?img=11",
+        "userId": "user_200",
+        "username": "coder_x",
+        "text": "¡Me apunto! ¿Hay pre-requisitos de JavaScript?",
+        "timestap": "2025-11-16T12:00:00Z"
+      },
+      {
+        "id": "c_002",
+        "profilePictureUrl": "https://i.pravatar.cc/150?img=11",
+        "userId": "user_201",
+        "username": "event_manager",
+        "text": "Sí, solo conocimiento básico de ES6. ¡Te esperamos!",
+        "timestap": "2025-11-16T12:30:00Z"
+      },
+      {
+        "id": "c_003",
+        "profilePictureUrl": "https://i.pravatar.cc/150?img=11",
+
+        "userId": "user_300",
+        "username": "junior_dev",
+        "text": "¿Dónde puedo encontrar la agenda completa?",
+        "timestap": "2025-11-16T14:00:00Z"
+      }
+    ]
   },
   {
     "id": "post_003",
@@ -34,28 +59,46 @@
     "eventDate": "2025-12-12T06:00:00.000Z",
     "location": "Volcán Ilamatepec",
     "caption": "¡Mi primer post en esta app! Creando un clon de Instagram con React Native. 🚀 #reactnative #coding #dev",
-    "description": "Salida grupal para subir el volcán de Santa Ana. Nivel intermedio. Llevar agua y ropa cómoda.",
+    "details": "Salida grupal para subir el volcán de Santa Ana. Nivel intermedio. Llevar agua y ropa cómoda.",
     "user": {
       "id": "user_789",
       "username": "exploradores_sv",
       "profilePictureUrl": "https://i.pravatar.cc/150?img=60"
     },
-    "media": [
-      {
-        "id": "media_003",
-        "type": "image",
-        "url": "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&q=80"
-      }
-    ],
+    "media": {
+      "id": "media_003",
+      "type": "image",
+      "url": "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&q=80"
+    },
     "stats": {
       "likeCount": 890,
-      "commentCount": 120
+      "commentCount": 2
     },
     "userInteraction": {
       "isLiked": true,
       "isBookmarked": true
     },
-    "createdAt": "2025-11-14T08:30:00Z"
+    "createdAt": "2025-11-14T08:30:00Z",
+    "comments": [
+      {
+        "id": "c_004",
+        "profilePictureUrl": "https://i.pravatar.cc/150?img=11",
+
+        "userId": "user_400",
+        "username": "hiker_pro",
+        "text": "¿El sendero es muy rocoso en diciembre?",
+        "timestap": "2025-11-15T10:00:00Z"
+      },
+      {
+        "id": "c_005",
+        "profilePictureUrl": "https://i.pravatar.cc/150?img=11",
+
+        "userId": "user_401",
+        "username": "adventure_fan",
+        "text": "¡Genial! ¡Nos vemos ahí a las 6 am!",
+        "timestap": "2025-11-15T11:00:00Z"
+      }
+    ]
   },
   {
     "id": "post_004",
@@ -63,33 +106,37 @@
     "eventDate": "2025-12-20T12:00:00.000Z",
     "location": "Parque Cuscatlán",
     "caption": "¡Mi primer post en esta app! Creando un clon de Instagram con React Native. 🚀 #reactnative #coding #dev",
-    "description": "Ven a disfrutar de los mejores platillos locales. Habrá música en vivo y juegos para niños. Entrada libre.",
+    "details": "Ven a disfrutar de los mejores platillos locales. Habrá música en vivo y juegos para niños. Entrada libre.",
     "user": {
       "id": "user_101",
       "username": "foodie_events",
       "profilePictureUrl": "https://i.pravatar.cc/150?img=33"
     },
-    "media": [
-      {
-        "id": "media_004",
-        "type": "image",
-        "url": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80"
-      },
-      {
-        "id": "media_005",
-        "type": "image",
-        "url": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80"
-      }
-    ],
+    "media": {
+      "id": "media_004",
+      "type": "image",
+      "url": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80"
+    },
     "stats": {
       "likeCount": 56,
-      "commentCount": 2
+      "commentCount": 1
     },
     "userInteraction": {
       "isLiked": false,
       "isBookmarked": false
     },
-    "createdAt": "2025-11-17T09:15:00Z"
+    "createdAt": "2025-11-17T09:15:00Z",
+    "comments": [
+      {
+        "id": "c_006",
+        "profilePictureUrl": "https://i.pravatar.cc/150?img=11",
+
+        "userId": "user_500",
+        "username": "mama_luchona",
+        "text": "¿Hay parqueo cerca para dejar el carro?",
+        "timestap": "2025-11-17T10:00:00Z"
+      }
+    ]
   },
   {
     "id": "post_005",
@@ -97,27 +144,44 @@
     "eventDate": "2025-12-02T19:30:00.000Z",
     "location": "Centro Cívico Cultural",
     "caption": "¡Mi primer post en esta app! Creando un clon de Instagram con React Native. 🚀 #reactnative #coding #dev",
-    "description": "Proyección de 'Cinema Paradiso' al aire libre. Venta de palomitas y bebidas. ¡No te lo pierdas!",
+    "details": "Proyección de 'Cinema Paradiso' al aire libre. Venta de palomitas y bebidas. ¡No te lo pierdas!",
     "user": {
       "id": "user_202",
       "username": "cineclub_arte",
       "profilePictureUrl": "https://i.pravatar.cc/150?img=5"
     },
-    "media": [
-      {
-        "id": "media_006",
-        "type": "image",
-        "url": "https://images.unsplash.com/photo-1517604931442-71053e6e2619?w=800&q=80"
-      }
-    ],
+    "media": {
+      "id": "media_006",
+      "type": "image",
+      "url": "https://images.unsplash.com/photo-1517604931442-71053e6e2619?w=800&q=80"
+    },
     "stats": {
       "likeCount": 128,
-      "commentCount": 15
+      "commentCount": 2
     },
     "userInteraction": {
       "isLiked": true,
       "isBookmarked": false
     },
-    "createdAt": "2025-11-16T18:45:00Z"
+    "createdAt": "2025-11-16T18:45:00Z",
+    "comments": [
+      {
+        "id": "c_007",
+        "profilePictureUrl": "https://i.pravatar.cc/150?img=11",
+
+        "userId": "user_600",
+        "username": "classic_lover",
+        "text": "Excelente elección. ¿Cuánto cuesta la entrada?",
+        "timestap": "2025-11-17T15:00:00Z"
+      },
+      {
+        "id": "c_008",
+        "profilePictureUrl": "https://i.pravatar.cc/150?img=11",
+        "userId": "user_601",
+        "username": "event_admin",
+        "text": "La entrada es libre, solo se cobran las palomitas.",
+        "timestap": "2025-11-17T15:30:00Z"
+      }
+    ]
   }
 ]

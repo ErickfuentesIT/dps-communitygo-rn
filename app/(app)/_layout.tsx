@@ -10,11 +10,12 @@ export default function AppLayout() {
   const router = useRouter();
   const pathname = usePathname();
   const isFabExtended = useUIStore((state) => state.isFabExtended);
-  const isCreatingEvent = useUIStore((state) => state.isCreatingEvent);
   const setIsCreatingEvent = useUIStore((state) => state.setIsCreatingEvent);
 
   const isFabVisible =
-    pathname.includes("profile") || pathname.includes("/create-event");
+    pathname.includes("profile") ||
+    pathname.includes("/create-event") ||
+    "/[postId]";
 
   const styles = useHomeStyles();
   const onCrearEvento = () => {

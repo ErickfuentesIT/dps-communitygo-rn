@@ -11,33 +11,32 @@ export interface PostUser {
 
 // Interfaz para cada item en el carrusel de media
 export interface PostMedia {
-  id: string;
-  type: MediaType;
-  url: string;
+  id?: string;
+  type?: MediaType;
+  url?: string | null;
 }
 
 // Interfaz para las estadísticas del post
 export interface PostStats {
   likeCount: number;
   commentCount: number;
+  attendanceCount: number;
 }
 
 // Interfaz para el estado de interacción del usuario actual
 export interface UserInteraction {
   isLiked: boolean;
   isBookmarked: boolean;
+  isAttending: boolean;
 }
 
-// Interfaz para el usuario de un comentario (simplificado)
-export interface CommentUser {
-  username: string;
-}
-
-// Interfaz para la vista previa de comentarios
-export interface CommentPreview {
+export interface PostComments {
   id: string;
-  user: CommentUser;
+  profilePictureUrl?: string;
+  userId: string;
+  username: string;
   text: string;
+  timestap: string;
 }
 
 // --- La Interfaz Principal del Post ---
@@ -45,12 +44,14 @@ export interface Post {
   id: string;
   title: string;
   eventDate: string;
-  user: PostUser;
-  media: PostMedia[]; // Un array de objetos PostMedia
-  caption: string;
   location?: string; // Hecho opcional, ya que no todos los posts lo tienen
+  caption: string;
+  details: string;
+  user: PostUser;
+  media: PostMedia; // Un array de objetos PostMedia
+
   stats: PostStats;
   userInteraction: UserInteraction;
-  commentPreview: CommentPreview[]; // Un array de vistas previas
   createdAt: string; // (string para la fecha en formato ISO)
+  comments: PostComments[];
 }

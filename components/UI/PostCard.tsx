@@ -9,6 +9,7 @@ import CustomText from "./CustomText";
 
 import { usePostsStore } from "@/store/usePostsStore";
 import { Post } from "@/types/Post";
+import { Link } from "expo-router";
 
 interface PostCardProps {
   post: Post;
@@ -41,54 +42,68 @@ function PostCard({ post }: PostCardProps) {
   };
 
   return (
-    <Card style={styles.card}>
-      <Card.Title
-        title={user.username}
-        titleStyle={styles.content}
-        left={(props) => (
-          <Image
-            source={user.profilePictureUrl}
-            style={styles.profilePicture}
-            contentFit="contain"
-          />
-        )}
-      />
+    <Link
+      href={{
+        // Usa el nombre de tu archivo dinámico (la ruta base)
+        // Asumiendo que tu archivo es app/(app)/[postId].tsx
+        pathname: "/[postId]",
 
-      <Card.Cover
-        source={{ uri: "https://picsum.photos/700" }}
-        style={styles.cover}
-      />
-      <Card.Actions>
-        <View style={styles.actionGroup}>
+        // Pasa los parámetros por separado
+        params: {
+          postId: post.id, // La clave 'postId' debe coincidir con [postId]
+        },
+      }}
+      asChild
+    >
+      <Card style={styles.card}>
+        <Card.Title
+          title={user.username}
+          titleStyle={styles.content}
+          left={(props) => (
+            <Image
+              source={user.profilePictureUrl}
+              style={styles.profilePicture}
+              contentFit="contain"
+            />
+          )}
+        />
+
+        <Card.Cover
+          source={{ uri: "https://picsum.photos/700" }}
+          style={styles.cover}
+        />
+        <Card.Actions>
+          <View style={styles.actionGroup}>
+            <CustomIconButtom
+              icon={isLiked ? "heart" : "heart-outline"}
+              iconColor={isLiked ? "red" : undefined}
+              onPress={onLikePress}
+              animated={true}
+            />
+            <CustomText style={styles.Counter}>{likeCount}</CustomText>
+            <CustomIconButtom icon="message-outline" onPress={onShowMessages} />
+            <CustomText style={styles.Counter}>{messagesCount}</CustomText>
+          </View>
+
+          <View style={styles.spacer} />
           <CustomIconButtom
-            icon={isLiked ? "heart" : "heart-outline"}
-            iconColor={isLiked ? "red" : undefined}
-            onPress={onLikePress}
-            animated={true}
+            icon="share-variant-outline"
+            onPress={() => console.log("Compartir")}
+            containerColor="none"
           />
-          <CustomText style={styles.Counter}>{likeCount}</CustomText>
-          <CustomIconButtom icon="message-outline" onPress={onShowMessages} />
-          <CustomText style={styles.Counter}>{messagesCount}</CustomText>
-        </View>
-
-        <View style={styles.spacer} />
-        <CustomIconButtom
-          icon="share-variant-outline"
-          onPress={() => console.log("Compartir")}
-          containerColor="none"
-        />
-        <CustomIconButtom
-          icon={isBookmarked ? "bookmark" : "bookmark-outline"}
-          containerColor="none"
-          onPress={onBookmarkPress}
-        />
-      </Card.Actions>
-      <Card.Content>
-        <Text variant="bodyMedium" style={styles.content}>
-          {post.caption}
-        </Text>
-      </Card.Content>
-    </Card>
+          <CustomIconButtom
+            icon={isBookmarked ? "bookmark" : "bookmark-outline"}
+            containerColor="none"
+            onPress={onBookmarkPress}
+          />
+        </Card.Actions>
+        <Card.Content>
+          <Text variant="bodyMedium" style={styles.content}>
+            {post.caption}
+          </Text>
+        </Card.Content>
+      </Card>
+    </Link>
   );
 }
 
