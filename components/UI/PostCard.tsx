@@ -1,109 +1,162 @@
-import CustomIconButtom from "@/components/UI/CustomIconButtom";
-import { theme } from "@/styles/theme";
-import { Image } from "expo-image";
-import * as React from "react";
-import { useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Card, Text } from "react-native-paper";
-import CustomText from "./CustomText";
+import { useToggleLike } from "@/hooks/useSocial"; // 👈 Importa tu nuevo hook
 
-import { usePostsStore } from "@/store/usePostsStore";
-import { Post } from "@/types/Post";
 import { Link } from "expo-router";
 
+import React from "react";
+
+import { StyleSheet, View } from "react-native";
+
+import { Avatar, Card, Text } from "react-native-paper";
+
+// Tus componentes personalizados
+
+import CustomIconButtom from "@/components/UI/CustomIconButtom";
+
+import CustomText from "./CustomText";
+
+// Imports actualizados a la nueva estructura
+
+import { theme } from "@/styles/theme";
+
+import { EventSummary } from "@/types/Event"; // Usamos el nuevo tipo
+
+import { useEventsStore } from "./../../store/useEventStore"; // Usamos el nuevo store
+
 interface PostCardProps {
-  post: Post;
+  event: EventSummary; // 👈 Recibimos 'event', no 'post'
 }
 
-function PostCard({ post }: PostCardProps) {
-  const [isMessagesShow, setIsMessagesShow] = useState(false);
+function PostCard({ event }: PostCardProps) {
+  // Acciones del Store
 
-  const toggleLike = usePostsStore((state) => state.toggleLike);
-  const toggleBookmark = usePostsStore((state) => state.toggleBookmark);
-  const user = post.user;
-  const isLiked = post.userInteraction.isLiked;
-  const isBookmarked = post.userInteraction.isBookmarked;
-  const likeCount = post.stats.likeCount;
-  const messagesCount = post.stats.commentCount;
+  const toggleBookmark = useEventsStore((state) => state.toggleBookmark);
 
-  const onLikePress = () => {
-    toggleLike(post.id);
+  const { mutate: toggleLikeApi } = useToggleLike();
 
-    //  API para guardar el like
+  // Desestructuración de los datos NUEVOS de la API
+
+  const {
+    id,
+
+    title,
+
+    description,
+
+    creator, // Ahora es 'creator', no 'user'
+
+    imageUrl,
+
+    likesCount,
+
+    commentsCount,
+
+    isLikedByCurrentUser,
+
+    isBookmarkedByCurrentUser,
+  } = event;
+
+  // Generamos iniciales para el Avatar (ej. "EF" para Erick Fuentes)
+
+  const avatarLabel = `${creator.firstName[0]}${creator.lastName[0]}`;
+
+  const onLikePress = (e) => {
+    e.stopPropagation();
+
+    toggleLikeApi(id);
   };
 
   const onBookmarkPress = () => {
-    toggleBookmark(post.id); // ... API para bookmark
-  };
-
-  const onShowMessages = () => {
-    setIsMessagesShow(!isMessagesShow);
-    // ... aquí llamarías a tu API
+    toggleBookmark(id);
   };
 
   return (
-    <Link
-      href={{
-        // Usa el nombre de tu archivo dinámico (la ruta base)
-        // Asumiendo que tu archivo es app/(app)/[postId].tsx
-        pathname: "/[postId]",
+    <Card style={styles.card}>
+      {/* 1. Header con datos del Creador */}
 
-        // Pasa los parámetros por separado
-        params: {
-          postId: post.id, // La clave 'postId' debe coincidir con [postId]
-        },
-      }}
-      asChild
-    >
-      <Card style={styles.card}>
-        <Card.Title
-          title={user.username}
-          titleStyle={styles.content}
-          left={(props) => (
-            <Image
-              source={user.profilePictureUrl}
-              style={styles.profilePicture}
-              contentFit="contain"
-            />
-          )}
-        />
+      <Card.Title
+        title={`${creator.firstName} ${creator.lastName}`}
+        subtitle={`@${creator.userName}`}
+        titleStyle={styles.content}
+        left={(props) => (
+          // Usamos Avatar.Text por si no hay foto de perfil
 
-        <Card.Cover
-          source={{ uri: "https://picsum.photos/700" }}
-          style={styles.cover}
-        />
-        <Card.Actions>
-          <View style={styles.actionGroup}>
-            <CustomIconButtom
-              icon={isLiked ? "heart" : "heart-outline"}
-              iconColor={isLiked ? "red" : undefined}
-              onPress={onLikePress}
-              animated={true}
-            />
-            <CustomText style={styles.Counter}>{likeCount}</CustomText>
-            <CustomIconButtom icon="message-outline" onPress={onShowMessages} />
-            <CustomText style={styles.Counter}>{messagesCount}</CustomText>
-          </View>
-
-          <View style={styles.spacer} />
-          <CustomIconButtom
-            icon="share-variant-outline"
-            onPress={() => console.log("Compartir")}
-            containerColor="none"
+          <Avatar.Text
+            {...props}
+            size={40}
+            label={avatarLabel}
+            style={{ backgroundColor: theme.colors.primary }}
+            color="white"
           />
-          <CustomIconButtom
-            icon={isBookmarked ? "bookmark" : "bookmark-outline"}
-            containerColor="none"
-            onPress={onBookmarkPress}
-          />
-        </Card.Actions>
+        )}
+      />
+
+      {/* 2. Imagen del Evento (Solo si existe) */}
+      <Link
+        href={{
+          pathname: "/[postId]",
+
+          params: { postId: id },
+        }}
+        asChild
+      >
+        {imageUrl && (
+          <Card.Cover source={{ uri: imageUrl }} style={styles.cover} />
+        )}
+
+        {/* 3. Contenido (Título y Descripción) */}
+
         <Card.Content>
-          <Text variant="bodyMedium" style={styles.content}>
-            {post.caption}
+          <Text
+            variant="titleMedium"
+            style={{
+              fontWeight: "bold",
+
+              marginTop: 10,
+
+              color: theme.colors.onTertiary,
+            }}
+          >
+            {title}
+          </Text>
+
+          <Text variant="bodyMedium" style={styles.content} numberOfLines={3}>
+            {description}
           </Text>
         </Card.Content>
-      </Card>
-    </Link>
+      </Link>
+      {/* 4. Botones de Acción */}
+
+      <Card.Actions>
+        <View style={styles.actionGroup}>
+          <CustomIconButtom
+            icon={isLikedByCurrentUser ? "heart" : "heart-outline"}
+            iconColor={isLikedByCurrentUser ? "red" : undefined}
+            onPress={onLikePress}
+            animated={true}
+          />
+
+          <CustomText style={styles.Counter}>{likesCount}</CustomText>
+
+          <CustomIconButtom icon="message-outline" onPress={() => {}} />
+
+          <CustomText style={styles.Counter}>{commentsCount}</CustomText>
+        </View>
+
+        <View style={styles.spacer} />
+
+        <CustomIconButtom
+          icon="share-variant-outline"
+          onPress={() => console.log("Compartir")}
+          containerColor="none"
+        />
+
+        <CustomIconButtom
+          icon={isBookmarkedByCurrentUser ? "bookmark" : "bookmark-outline"}
+          containerColor="none"
+          onPress={onBookmarkPress}
+        />
+      </Card.Actions>
+    </Card>
   );
 }
 
@@ -112,33 +165,43 @@ export default PostCard;
 const styles = StyleSheet.create({
   card: {
     margin: 0,
+
     padding: 0,
+
     borderRadius: 0,
+
     width: "100%",
+
     backgroundColor: theme.colors.onBackground,
+
+    marginBottom: 10, // Un poco de espacio entre tarjetas
   },
-  profilePicture: {
-    aspectRatio: 16 / 9,
-    height: "auto",
-    width: 32,
-    minHeight: 32,
-  },
+
   cover: {
     borderRadius: 0,
   },
+
   content: {
     color: theme.colors.onTertiary,
   },
+
   spacer: {
     flex: 1,
   },
+
   actionGroup: {
-    flexDirection: "row", // Pone los elementos en fila
-    alignItems: "center", // Centra el texto verticalmente con el icono
+    flexDirection: "row",
+
+    alignItems: "center",
   },
+
   Counter: {
     fontSize: 14,
-    marginLeft: -4, // Pega el número al icono
-    color: theme.colors.onTertiary, // Asegúrate de que tenga el color correcto
+
+    marginLeft: -4,
+
+    marginRight: 10, // Espacio entre contador y siguiente icono
+
+    color: theme.colors.onTertiary,
   },
 });

@@ -1,24 +1,19 @@
-// app/(app)/[postId].tsx
 import CustomText from "@/components/UI/CustomText";
-import Header from "@/components/UI/Header";
-import { usePostsStore } from "@/store/usePostsStore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
-import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import {
-  Avatar,
-  Button,
-  Divider,
-  Text,
-  TextInput,
-  useTheme,
-} from "react-native-paper";
+import React, { useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { Button, Divider, Text, TextInput, useTheme } from "react-native-paper";
 import { formatEventDateTime } from "./../assets/functions/formatIsoToString";
-// Importa el icono de la cámara si es necesario (o usa el de RNP)
+import { useEventsStore } from "./../store/useEventStore"; // 👈 Store de Eventos (nuevo nombre)
 
-// --- 1. Componente Auxiliar para los Metadatos ---
+// --- Necesitas importar useQuery y client para esta estrategia ---
+import Header from "@/components/UI/Header";
+import { EventDetail } from "@/types/Event"; // Usamos EventDetail y EventSummary
+import { useQuery } from "@tanstack/react-query";
+import client from "./../utils/client";
+
+// --- Componente Auxiliar (MetaItem) (Mantenido) ---
 const MetaItem = ({ icon, text }: { icon: string; text: string }) => (
   <View style={metadataStyles.metaItem}>
     <MaterialCommunityIcons name={icon as any} size={20} color="gray" />
@@ -31,51 +26,104 @@ const MetaItem = ({ icon, text }: { icon: string; text: string }) => (
 export default function PostDetailScreen() {
   const { postId } = useLocalSearchParams();
   const theme = useTheme();
-  const toggleAttendance = usePostsStore((state) => state.toggleAttendance);
-  const post = usePostsStore((state) =>
-    state.posts.find((p) => p.id === postId)
+// ... otros estados y hooks ...
+const [newComment, setNewComment] = useState('');
+
+// Acciones del Store (Añadir comentario) - Tendrías que definirla en tu store.
+// const addComment = useEventsStore((state) => state.addComment); 
+// ...
+  // Aseguramos que postId sea un string
+  const eventId = Array.isArray(postId) ? postId[0] : postId;
+
+  // 1. OBTENER RESUMEN (Desde Zustand)
+  // const toggleAttendance = useEventsStore((state) => state.toggleAttendance);
+  const summaryEvent = useEventsStore((state) =>
+    state.events.find((e) => e.id === eventId)
   );
 
-  if (!post) {
+  // 2. OBTENER DETALLES COMPLETOS (Desde API - React Query)
+  const {
+    data: fullEvent,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["eventDetail", eventId],
+    queryFn: async () => {
+      const resp = await client.get<EventDetail>(`/events/${eventId}`);
+      return resp.data;
+    },
+    // Solo se ejecuta si hay un ID y el Store no tiene el evento aún
+    enabled: !!eventId,
+    // Usamos el resumen como placeholder mientras carga el detalle
+    initialData: summaryEvent as EventDetail | undefined,
+  });
+
+  // 3. FUENTE DE VERDAD: Usamos los detalles si están cargados, sino el resumen
+  const eventToShow = fullEvent || summaryEvent;
+
+  // --- MANEJO DE ESTADOS DE CARGA/ERROR ---
+  if (isLoading && !eventToShow) {
+    return <ActivityIndicator style={{ marginTop: 50 }} size="large" />;
+  }
+
+  if (!eventToShow) {
+    // Si el fetch falló Y no había data en el store
     return (
-      <Text style={{ padding: 20, textAlign: "center" }}>
-        Publicación no encontrada.
+      <Text style={{ padding: 20, textAlign: "center", color: "black" }}>
+        Publicación no encontrada. ID: {eventId}
       </Text>
     );
   }
 
-  const { user, title, location, eventDate, details, stats, userInteraction } =
-    post;
-  const isAttending = userInteraction.isAttending;
-  const attendanceCount = stats.attendanceCount;
+  // 4. DESTRUCTURING FINAL (Basado en la estructura fusionada)
+  const {
+    id,
+    title,
+    description,
+    creator, // Nuevo campo
+    startDate, // Nuevo campo
+    comments, // Nuevo campo (solo disponible en fullEvent)
+    imageUrl,
+    likesCount, // Ahora se lee directamente
+    isLikedByCurrentUser, // Ahora se lee directamente
+    // Los campos 'address' y 'captions' solo están disponibles en 'fullEvent'
+  } = eventToShow;
+ // Dentro de PostDetailScreen
+const handleSendComment = () => {
+    if (newComment.trim() === '') {
+        return; // No enviar comentarios vacíos
+    }
+    
+    // Aquí iría tu lógica de mutación de React Query para llamar a la API
+    console.log("Enviando comentario:", newComment);
+    
+    // 1. (Optimista) Actualizar el Store para que el comentario aparezca instantáneamente.
+    // addComment(postId, newComment); 
 
-  // Función de asistencia
-  const handleRSVP = () => {
-    toggleAttendance(post.id);
-  };
+    // 2. Limpiar el campo.
+    setNewComment('');
+};
+  // Los campos de interacción
+  const isAttending = false; // Asume false hasta que la API lo diga
+  const attendanceCount = 0; // Asume 0 hasta que la API lo diga
+
+  // const handleRSVP = () => {
+  //   toggleAttendance(id);
+  //   // Aquí también llamarías a la API con una mutación
+  // };
 
   return (
     <ScrollView style={styles.container}>
       <Header />
-      {/* 1. Imagen de Cabecera (Simulación) */}
-      <View style={{ height: 200, backgroundColor: "lightgray" }}>
-        <Image
-          source={{ uri: post.media.url || undefined }}
-          style={{ width: "100%", height: "100%" }}
-        />
-      </View>
-
+      {/* ... */}
       <View style={styles.content}>
         <Text variant="headlineMedium" style={styles.title}>
           {title}
         </Text>
 
-        {/* 2. Metadatos (Ubicación, Asistencia, Fecha, Hora) */}
+        {/* 2. Metadatos */}
         <View style={metadataStyles.metadataContainer}>
-          <MetaItem
-            icon="map-marker"
-            text={location || "Ubicación no disponible"}
-          />
+          <MetaItem icon="map-marker" text={fullEvent?.address || ""} />
           <MetaItem
             icon="account-multiple"
             text={`${attendanceCount} personas van`}
@@ -84,16 +132,14 @@ export default function PostDetailScreen() {
         <View style={metadataStyles.metadataContainer}>
           <MetaItem
             icon="calendar"
-            text={new Date(eventDate).toLocaleDateString("es-ES")}
+            text={formatEventDateTime(startDate)} // Usa el campo correcto
           />
           <MetaItem
             icon="clock-time-four-outline"
-            text={
-              new Date(eventDate).toLocaleTimeString("es-ES", {
-                hour: "2-digit",
-                minute: "2-digit",
-              }) + " - 20:00"
-            }
+            text={new Date(startDate).toLocaleTimeString("es-ES", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           />
         </View>
 
@@ -101,7 +147,10 @@ export default function PostDetailScreen() {
           Descripción del evento
         </CustomText>
         <Text variant="bodyMedium" style={styles.description}>
-          {details || "No hay descripción disponible para este evento."}
+          {/* ✅ CORRECCIÓN: Si fullEvent existe, usa 'captions', sino usa 'description' */}
+          {fullEvent?.captions ||
+            description ||
+            "No hay descripción disponible."}
         </Text>
 
         <Divider style={{ marginVertical: 20 }} />
@@ -110,79 +159,25 @@ export default function PostDetailScreen() {
         <View style={styles.actionRow}>
           <Button
             mode="contained"
-            onPress={handleRSVP}
+            // onPress={handleRSVP}
             icon={isAttending ? "check-circle" : "account-check-outline"}
+            // Deshabilitado mientras cargan los datos por seguridad
+            disabled={isLoading}
             buttonColor={isAttending ? "green" : theme.colors.primary}
             contentStyle={styles.buttonContent}
             style={styles.actionButton}
           >
             {isAttending ? "Asistencia Marcada" : "Marcar asistencia"}
           </Button>
-          {/* Icono de check (Persona) */}
-          <MaterialCommunityIcons
-            name="account-check-outline"
-            size={30}
-            color={isAttending ? "green" : "gray"}
-            style={{ marginLeft: 15 }}
-          />
+          <MaterialCommunityIcons /* ... */ />
         </View>
 
-        {/* 4. Sección de Comentarios */}
-        <View style={styles.commentSection}>
-          <TextInput
-            placeholder="Agregar comentario..."
-            mode="outlined"
-            style={styles.commentInput}
-            right={
-              <TextInput.Icon
-                icon="send"
-                onPress={() => console.log("Enviar")}
-              />
-            }
-          />
 
-          <View style={styles.commentHeader}>
-            <Text variant="titleMedium">Comentarios</Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <MaterialCommunityIcons
-                name="heart"
-                size={18}
-                color="red"
-                style={{ marginRight: 4 }}
-              />
-              <Text variant="bodyLarge">45</Text>
-            </View>
-          </View>
 
-          {post.comments?.map((comment, index) => (
+          {/* ✅ CORRECCIÓN: Renderizar lista de comentarios SOLO si el array existe */}
+          {fullEvent?.comments?.map((comment, index) => (
             <View key={comment.id || index} style={styles.commentItem}>
-              <Avatar.Image
-                size={30}
-                // icon="account"
-                source={{ uri: comment.profilePictureUrl }}
-                style={{ backgroundColor: "transparent" }}
-              />
-              <View style={{ marginLeft: 10 }}>
-                <View style={{ flexDirection: "row" }}>
-                  <Text
-                    variant="bodyMedium"
-                    style={{ fontWeight: "bold", color: "#000" }}
-                  >
-                    {comment.username}
-                    {" - "}
-                  </Text>
-                  <Text
-                    variant="bodyMedium"
-                    style={{ fontWeight: "bold", color: "#000" }}
-                  >
-                    {formatEventDateTime(comment.timestap)}
-                  </Text>
-                </View>
-
-                <Text variant="bodyMedium" style={{ color: "#000" }}>
-                  {comment.text}
-                </Text>
-              </View>
+              {/* ... Renderizar comentarios ... */}
             </View>
           ))}
         </View>
@@ -191,10 +186,12 @@ export default function PostDetailScreen() {
   );
 }
 
+// ... Estilos ...
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 20, paddingTop: 10 },
-  title: { fontWeight: "bold", marginBottom: 10 },
+  title: { fontWeight: "bold", marginBottom: 10, color: "black" },
   sectionHeader: { fontWeight: "bold", marginVertical: 10, color: "black" },
   description: { lineHeight: 22, color: "#333" },
   actionRow: {

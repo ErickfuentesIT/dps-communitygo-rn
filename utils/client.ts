@@ -4,7 +4,7 @@ import { tokenStorage } from "./tokenStorage";
 
 // 1. Crear instancia base
 const client = axios.create({
-  baseURL: "http://192.168.58.106:3000/api/v1", // 👈 PON TU URL AQUÍ
+  baseURL: "http://localhost:3000/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
@@ -41,7 +41,7 @@ client.interceptors.response.use(
         // B. Llamar al endpoint de refresco (AJUSTA ESTA RUTA SEGÚN TU BACKEND)
         // Nota: Usamos axios puro aquí para evitar loops con los interceptores de 'client'
         const response = await axios.post(
-          "http://192.168.58.106:3000/api/v1/auth/refresh",
+          "http://localhost:3000/api/v1/auth/refresh",
           {
             refreshToken: refreshToken,
           }

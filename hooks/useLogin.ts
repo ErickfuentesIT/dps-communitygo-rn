@@ -21,7 +21,7 @@ interface LoginVariables {
 
 export const useLogin = () => {
   const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser); // Acción de Zustand
+  const setUser = useAuthStore((state) => state.setUser);
 
   return useMutation({
     mutationFn: async ({ email, pass }: LoginVariables) => {
