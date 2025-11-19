@@ -1,6 +1,7 @@
 import CustomButton from "@/components/UI/CustomButtom";
 import CustomText from "@/components/UI/CustomText";
 import PasswordInput from "@/components/UI/PasswordInput";
+import { useLogin } from "@/hooks/useLogin";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
@@ -13,6 +14,14 @@ export default function Login() {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const styles = useLoginStyles();
   const router = useRouter();
+  const loginMutation = useLogin();
+
+  const handleLogin = () => {
+    loginMutation.mutate({
+      email,
+      pass: password,
+    });
+  };
 
   function goToHome() {
     router.push("/(app)/home");
@@ -67,7 +76,7 @@ export default function Login() {
             mode="outlined"
             textColor="#000"
             style={styles.btnGeneral}
-            onPress={goToHome}
+            onPress={handleLogin}
           >
             Iniciar Sesión
           </CustomButton>

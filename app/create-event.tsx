@@ -83,11 +83,14 @@ export default function CreateEventScreen() {
       stats: {
         likeCount: 0,
         commentCount: 0,
+        attendanceCount: 0,
       },
       userInteraction: {
         isLiked: false,
         isBookmarked: false,
+        isAttending: false,
       },
+      comments: [],
       createdAt: new Date().toISOString(),
     };
 

@@ -13,9 +13,7 @@ export default function AppLayout() {
   const setIsCreatingEvent = useUIStore((state) => state.setIsCreatingEvent);
 
   const isFabVisible =
-    pathname.includes("profile") ||
-    pathname.includes("/create-event") ||
-    "/[postId]";
+    pathname.includes("events") || pathname.includes("/home");
 
   const styles = useHomeStyles();
   const onCrearEvento = () => {
@@ -85,7 +83,7 @@ export default function AppLayout() {
           label="Crear Evento"
           extended={isFabExtended}
           onPress={onCrearEvento}
-          visible={!isFabVisible}
+          visible={isFabVisible}
           animateFrom="right"
           iconMode="static"
           style={styles.fabStyle}

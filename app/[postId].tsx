@@ -156,7 +156,6 @@ export default function PostDetailScreen() {
 
           {post.comments?.map((comment, index) => (
             <View key={comment.id || index} style={styles.commentItem}>
-              {}
               <Avatar.Image
                 size={30}
                 // icon="account"
