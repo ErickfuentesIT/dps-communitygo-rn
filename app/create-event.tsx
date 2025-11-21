@@ -1,8 +1,7 @@
 import Header from "@/components/UI/Header";
-import { usePostsStore } from "@/store/usePostsStore";
 import { useUIStore } from "@/store/useUIStore";
 import { theme } from "@/styles/theme";
-import { Post } from "@/types/Post";
+import { CreateEventPayload, EventSummary } from "@/types/Event";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
@@ -14,35 +13,37 @@ import {
   View,
 } from "react-native";
 import { Button, Text, TextInput, useTheme } from "react-native-paper";
+import { useEventsStore } from "./../store/useEventStore";
 
-// 1. IMPORTAR LIBRERÍA DE FECHAS
+// FECHA Y HORA
+import client from "@/utils/client";
+import { useMutation } from "@tanstack/react-query";
 import { DatePickerInput, TimePickerModal } from "react-native-paper-dates";
-// IMPORTANTE: Registra el locale si lo necesitas en español (en _layout.tsx idealmente)
-// import { es } from 'react-native-paper-dates';
-// registerTranslation('es', es);
 
 export default function CreateEventScreen() {
-  const theme = useTheme();
+  const paperTheme = useTheme();
   const router = useRouter();
   const setIsCreatingEvent = useUIStore((state) => state.setIsCreatingEvent);
-  const addPost = usePostsStore((state) => state.addPost);
+  const addEvent = useEventsStore((state) => state.addEvent);
 
-  // Estados
+  // Estados formulario
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [details, setDetails] = useState("");
+  const [details, setDetails] = useState(""); // lo usaremos como captions
   const [location, setLocation] = useState("");
   const [image, setImage] = useState<string | null>(null);
 
-  // --- ESTADOS DE FECHA Y HORA ---
+  // Estados de fecha y hora
   const [inputDate, setInputDate] = useState<Date | undefined>(new Date());
   const [visibleTime, setVisibleTime] = useState(false);
+
+  const fetchEvents = useEventsStore((state) => state.fetchEvents);
+
   const [time, setTime] = useState<{ hours: number; minutes: number }>({
     hours: 12,
     minutes: 0,
   });
 
-  // --- MANEJO DE HORA ---
   const onDismissTime = useCallback(() => {
     setVisibleTime(false);
   }, []);
@@ -55,49 +56,57 @@ export default function CreateEventScreen() {
     []
   );
 
-  // --- MANEJO DE SUBMIT Y CANCEL ---
-  const handleSubmit = () => {
-    // Combinar fecha y hora
-    const finalDate = inputDate || new Date();
-    finalDate.setHours(time.hours);
-    finalDate.setMinutes(time.minutes);
+  // 🔹 MUTATION PARA CREAR EVENTO
+  const createEventMutation = useMutation({
+    mutationFn: async (payload: CreateEventPayload) => {
+      const { data } = await client.post<EventSummary>("/events", payload);
+      return data;
+    },
+    onSuccess: async (newEventFromApi) => {
+      // Guardar en el store de eventos
+      addEvent(newEventFromApi);
+      console.log("Evento creado exitosamente:", newEventFromApi.title);
+      await fetchEvents();
+      setIsCreatingEvent(false);
+      router.back();
+    },
+    onError: (error) => {
+      console.error("Error al crear el evento:", error);
+      // Aquí puedes mostrar un toast/snackbar
+    },
+  });
 
-    const newPost: Post = {
-      id: crypto.randomUUID.toString(),
-      title: title,
-      eventDate: finalDate.toISOString(),
-      location: location,
-      caption: description,
-      details: details,
-      user: {
-        id: "1",
-        username: "user1",
-        profilePictureUrl:
-          "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80",
-      },
-      media: {
-        id: `media_${Date.now()}`,
-        type: "image",
-        url: image,
-      },
-      stats: {
-        likeCount: 0,
-        commentCount: 0,
-        attendanceCount: 0,
-      },
-      userInteraction: {
-        isLiked: false,
-        isBookmarked: false,
-        isAttending: false,
-      },
-      comments: [],
-      createdAt: new Date().toISOString(),
+  // --- SUBMIT ---
+  const handleSubmit = () => {
+    if (!title.trim() || !description.trim() || !location.trim()) {
+      console.log("Faltan campos obligatorios");
+      return;
+    }
+
+    const baseDate = inputDate || new Date();
+    // Crear un nuevo Date para no mutar el state original
+    const finalDate = new Date(
+      baseDate.getFullYear(),
+      baseDate.getMonth(),
+      baseDate.getDate(),
+      time.hours,
+      time.minutes,
+      0,
+      0
+    );
+
+    const payload: CreateEventPayload = {
+      title: title.trim(),
+      description: description.trim(),
+      captions: (details || description).trim(), // si no llenan detalles, usamos descripción
+      startDate: finalDate.toISOString(),
+      address: location.trim(),
+      // si el backend luego admite imagen, podrías agregar imageUrl aquí
+      // imageUrl: image ?? undefined,
     };
 
-    console.log("Enviando Post:", newPost);
-    addPost(newPost);
-    setIsCreatingEvent(false);
-    router.back();
+    console.log("Payload a enviar:", payload);
+    createEventMutation.mutate(payload);
   };
 
   const handleCancel = () => {
@@ -125,22 +134,22 @@ export default function CreateEventScreen() {
       <Text variant="labelLarge" style={styles.labelHeader}>
         Comparte tu evento con la comunidad
       </Text>
-      {/* --- TITULO --- */}
 
+      {/* TÍTULO */}
       <TextInput
         label="Título del evento"
         value={title}
         onChangeText={setTitle}
         mode="outlined"
         style={styles.input}
-        textColor={theme.colors.onTertiary}
+        textColor={paperTheme.colors.onTertiary}
       />
 
-      {/* --- DESCRIPCION --- */}
+      {/* DESCRIPCIÓN */}
       <TextInput
         label="Descripción"
         value={description}
-        textColor={theme.colors.onTertiary}
+        textColor={paperTheme.colors.onTertiary}
         onChangeText={setDescription}
         mode="outlined"
         multiline
@@ -148,11 +157,11 @@ export default function CreateEventScreen() {
         style={styles.input}
       />
 
-      {/* --- DETALLES EVENTO --- */}
+      {/* DETALLES (lo mapeamos a captions) */}
       <TextInput
-        label="Detalles evento"
+        label="Detalles evento (se mostrará como texto corto)"
         value={details}
-        textColor={theme.colors.onTertiary}
+        textColor={paperTheme.colors.onTertiary}
         onChangeText={setDetails}
         mode="outlined"
         multiline
@@ -160,21 +169,20 @@ export default function CreateEventScreen() {
         style={styles.input}
       />
 
-      {/* --- LOCALIZACION --- */}
+      {/* UBICACIÓN -> address */}
       <TextInput
         label="Ubicación"
         value={location}
         onChangeText={setLocation}
         mode="outlined"
         style={styles.input}
-        textColor={theme.colors.onTertiary}
+        textColor={paperTheme.colors.onTertiary}
         right={<TextInput.Icon icon="map-marker" />}
       />
 
-      {/* --- FECHA Y HORA --- */}
+      {/* FECHA Y HORA */}
       <View style={styles.row}>
-        {/* INPUT DE FECHA  */}
-        <View style={styles.halfInput}>
+        <View className="halfInput">
           <DatePickerInput
             locale="es"
             label="Fecha"
@@ -182,14 +190,13 @@ export default function CreateEventScreen() {
             onChange={(d) => setInputDate(d)}
             inputMode="start"
             mode="outlined"
-            textColor={theme.colors.onTertiary}
-            style={{ backgroundColor: theme.colors.onBackground }} // Tu estilo de fondo
+            textColor={paperTheme.colors.onTertiary}
+            style={{ backgroundColor: paperTheme.colors.onBackground }}
           />
         </View>
 
         <View style={{ width: 10 }} />
 
-        {/*INPUT DE HORA */}
         <View style={styles.halfInput}>
           <TextInput
             label="Hora"
@@ -197,18 +204,17 @@ export default function CreateEventScreen() {
               .toString()
               .padStart(2, "0")}`}
             mode="outlined"
-            textColor={theme.colors.onTertiary}
+            textColor={paperTheme.colors.onTertiary}
             right={
               <TextInput.Icon
                 icon="clock-outline"
                 onPress={() => setVisibleTime(true)}
               />
             }
-            editable={false} // No escribir, solo tocar
+            editable={false}
             onPressIn={() => setVisibleTime(true)}
-            style={{ backgroundColor: theme.colors.onBackground }}
+            style={{ backgroundColor: paperTheme.colors.onBackground }}
           />
-          {/* MODAL HORA */}
           <TimePickerModal
             visible={visibleTime}
             onDismiss={onDismissTime}
@@ -222,7 +228,7 @@ export default function CreateEventScreen() {
         </View>
       </View>
 
-      {/* --- SELECTOR DE IMAGEN --- */}
+      {/* IMAGEN */}
       <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
         {image ? (
           <Image source={{ uri: image }} style={styles.imagePreview} />
@@ -230,7 +236,7 @@ export default function CreateEventScreen() {
           <View
             style={[
               styles.imagePlaceholder,
-              { backgroundColor: theme.colors.surfaceVariant },
+              { backgroundColor: paperTheme.colors.surfaceVariant },
             ]}
           >
             <Button icon="camera" mode="text">
@@ -245,6 +251,8 @@ export default function CreateEventScreen() {
         mode="contained"
         onPress={handleSubmit}
         style={styles.submitButton}
+        loading={createEventMutation.isPending}
+        disabled={createEventMutation.isPending}
       >
         Publicar Evento
       </Button>
@@ -252,6 +260,7 @@ export default function CreateEventScreen() {
         mode="outlined"
         onPress={handleCancel}
         style={styles.submitButton}
+        disabled={createEventMutation.isPending}
       >
         Cancelar
       </Button>
@@ -279,7 +288,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 16,
   },
-  halfInput: { flex: 1 }, // Importante para que DatePickerInput ocupe el espacio
+  halfInput: { flex: 1 },
   imageContainer: {
     width: "100%",
     height: 200,

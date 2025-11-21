@@ -18,13 +18,16 @@ export default function Home() {
   const events = useEventsStore((state) => state.events);
   const setEvent = useEventsStore((state) => state.setEvents);
   const { data: apiData, isLoading, error, refetch } = useGetEvents();
+  const fetchEvents = useEventsStore((state) => state.fetchEvents);
 
   useEffect(() => {
     if (apiData) {
       setEvent(apiData);
     }
   }, [apiData, setEvent]);
-
+  useEffect(() => {
+    fetchEvents();
+  }, []);
   const onScroll = ({ nativeEvent }) => {
     const currentScrollPosition =
       Math.floor(nativeEvent?.contentOffset?.y) ?? 0;

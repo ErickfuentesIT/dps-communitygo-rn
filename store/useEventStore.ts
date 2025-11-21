@@ -1,38 +1,34 @@
 import { EventSummary } from "@/types/Event";
 import { create } from "zustand";
+import client from "./../utils/client";
 
 // --- Definición del Estado ---
 interface EventsState {
-  // Datos
   events: EventSummary[];
 
-  // Acciones
   setEvents: (events: EventSummary[]) => void;
   addEvent: (event: EventSummary) => void;
   toggleLike: (eventId: string) => void;
   toggleBookmark: (eventId: string) => void;
-}
 
-// --- Configuración del Middleware para Web/Mobile ---
-// Esto evita el error de 'import.meta' en la web
+  fetchEvents: () => Promise<void>;
+}
 
 // --- Creación del Store ---
 export const useEventsStore = create<EventsState>((set) => ({
-  // 1. Estado Inicial
+  // Estado Inicial
   events: [],
 
-  // 2. Cargar eventos desde la API (Sobrescribe todo)
+  // Remplazar listado de eventos
   setEvents: (newEvents) => set({ events: newEvents }),
 
-  // 3. Agregar un evento nuevo (Al principio de la lista)
-  // Útil cuando creas un evento y quieres verlo inmediatamente sin recargar
+  // Agregar evento al inicio
   addEvent: (newEvent) =>
     set((state) => ({
       events: [newEvent, ...state.events],
     })),
 
-  // 4. Dar Like (Actualización Optimista)
-  // Cambia el booleano y suma/resta 1 al contador instantáneamente
+  // Like
   toggleLike: (eventId) =>
     set((state) => ({
       events: state.events.map((event) => {
@@ -48,7 +44,7 @@ export const useEventsStore = create<EventsState>((set) => ({
       }),
     })),
 
-  // 5. Guardar/Bookmark
+  // Bookmark
   toggleBookmark: (eventId) =>
     set((state) => ({
       events: state.events.map((event) =>
@@ -60,4 +56,21 @@ export const useEventsStore = create<EventsState>((set) => ({
           : event
       ),
     })),
+
+  fetchEvents: async () => {
+    try {
+      const { data } = await client.get<EventSummary[]>("/events");
+
+      // Evitar crasheo si el backend devuelve algo inesperado
+      if (Array.isArray(data)) {
+        set({ events: data });
+      } else {
+        console.warn("La API devolvió un formato inesperado:", data);
+        set({ events: [] });
+      }
+    } catch (err) {
+      console.error("Error al obtener eventos:", err);
+      set({ events: [] });
+    }
+  },
 }));

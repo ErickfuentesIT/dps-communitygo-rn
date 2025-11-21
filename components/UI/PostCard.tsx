@@ -59,9 +59,7 @@ function PostCard({ event }: PostCardProps) {
 
   const avatarLabel = `${creator.firstName[0]}${creator.lastName[0]}`;
 
-  const onLikePress = (e) => {
-    e.stopPropagation();
-
+  const onLikePress = () => {
     toggleLikeApi(id);
   };
 
