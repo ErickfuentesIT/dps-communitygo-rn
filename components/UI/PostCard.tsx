@@ -1,63 +1,48 @@
-import { useToggleLike } from "@/hooks/useSocial"; // 👈 Importa tu nuevo hook
-
+import { useToggleLike } from "@/hooks/useSocial";
 import { Link } from "expo-router";
-
 import React from "react";
-
 import { StyleSheet, View } from "react-native";
-
 import { Avatar, Card, Text } from "react-native-paper";
 
-// Tus componentes personalizados
-
 import CustomIconButtom from "@/components/UI/CustomIconButtom";
-
+import { theme } from "@/styles/theme";
+import { EventSummary } from "@/types/Event";
+import { useEventsStore } from "./../../store/useEventStore";
 import CustomText from "./CustomText";
 
-// Imports actualizados a la nueva estructura
-
-import { theme } from "@/styles/theme";
-
-import { EventSummary } from "@/types/Event"; // Usamos el nuevo tipo
-
-import { useEventsStore } from "./../../store/useEventStore"; // Usamos el nuevo store
-
 interface PostCardProps {
-  event: EventSummary; // 👈 Recibimos 'event', no 'post'
+  event: EventSummary;
 }
 
 function PostCard({ event }: PostCardProps) {
-  // Acciones del Store
-
   const toggleBookmark = useEventsStore((state) => state.toggleBookmark);
-
   const { mutate: toggleLikeApi } = useToggleLike();
-
-  // Desestructuración de los datos NUEVOS de la API
 
   const {
     id,
-
     title,
-
     description,
-
-    creator, // Ahora es 'creator', no 'user'
-
+    creator,
     imageUrl,
-
     likesCount,
-
     commentsCount,
-
     isLikedByCurrentUser,
-
     isBookmarkedByCurrentUser,
   } = event;
 
-  // Generamos iniciales para el Avatar (ej. "EF" para Erick Fuentes)
+  // 👇 Iniciales seguras para el avatar
+  const firstInitial = creator?.firstName?.[0] ?? "";
+  const lastInitial = creator?.lastName?.[0] ?? "";
+  const avatarLabel = (firstInitial + lastInitial || "EV").toUpperCase(); // "EV" de "Evento"
 
-  const avatarLabel = `${creator.firstName[0]}${creator.lastName[0]}`;
+  // 👇 Nombre visible del creador (con fallback)
+  const creatorName =
+    creator && (creator.firstName || creator.lastName)
+      ? `${creator.firstName ?? ""} ${creator.lastName ?? ""}`.trim()
+      : "Organizado por la comunidad";
+
+  // 👇 Username visible (opcional)
+  const creatorUsername = creator?.userName ? `@${creator.userName}` : "";
 
   const onLikePress = () => {
     toggleLikeApi(id);
@@ -70,14 +55,11 @@ function PostCard({ event }: PostCardProps) {
   return (
     <Card style={styles.card}>
       {/* 1. Header con datos del Creador */}
-
       <Card.Title
-        title={`${creator.firstName} ${creator.lastName}`}
-        subtitle={`@${creator.userName}`}
+        title={creatorName}
+        subtitle={creatorUsername}
         titleStyle={styles.content}
         left={(props) => (
-          // Usamos Avatar.Text por si no hay foto de perfil
-
           <Avatar.Text
             {...props}
             size={40}
@@ -88,42 +70,39 @@ function PostCard({ event }: PostCardProps) {
         )}
       />
 
-      {/* 2. Imagen del Evento (Solo si existe) */}
+      {/* 2. Imagen + contenido clickeable */}
       <Link
         href={{
           pathname: "/[postId]",
-
           params: { postId: id },
         }}
         asChild
       >
-        {imageUrl && (
-          <Card.Cover source={{ uri: imageUrl }} style={styles.cover} />
-        )}
+        <View>
+          {imageUrl && (
+            <Card.Cover source={{ uri: imageUrl }} style={styles.cover} />
+          )}
 
-        {/* 3. Contenido (Título y Descripción) */}
+          <Card.Content>
+            <Text
+              variant="titleMedium"
+              style={{
+                fontWeight: "bold",
+                marginTop: 10,
+                color: theme.colors.onTertiary,
+              }}
+            >
+              {title}
+            </Text>
 
-        <Card.Content>
-          <Text
-            variant="titleMedium"
-            style={{
-              fontWeight: "bold",
-
-              marginTop: 10,
-
-              color: theme.colors.onTertiary,
-            }}
-          >
-            {title}
-          </Text>
-
-          <Text variant="bodyMedium" style={styles.content} numberOfLines={3}>
-            {description}
-          </Text>
-        </Card.Content>
+            <Text variant="bodyMedium" style={styles.content} numberOfLines={3}>
+              {description}
+            </Text>
+          </Card.Content>
+        </View>
       </Link>
-      {/* 4. Botones de Acción */}
 
+      {/* 4. Botones de Acción */}
       <Card.Actions>
         <View style={styles.actionGroup}>
           <CustomIconButtom
@@ -133,11 +112,11 @@ function PostCard({ event }: PostCardProps) {
             animated={true}
           />
 
-          <CustomText style={styles.Counter}>{likesCount}</CustomText>
+          <CustomText style={styles.Counter}>{likesCount ?? 0}</CustomText>
 
           <CustomIconButtom icon="message-outline" onPress={() => {}} />
 
-          <CustomText style={styles.Counter}>{commentsCount}</CustomText>
+          <CustomText style={styles.Counter}>{commentsCount ?? 0}</CustomText>
         </View>
 
         <View style={styles.spacer} />
@@ -163,43 +142,29 @@ export default PostCard;
 const styles = StyleSheet.create({
   card: {
     margin: 0,
-
     padding: 0,
-
     borderRadius: 0,
-
     width: "100%",
-
     backgroundColor: theme.colors.onBackground,
-
-    marginBottom: 10, // Un poco de espacio entre tarjetas
+    marginBottom: 10,
   },
-
   cover: {
     borderRadius: 0,
   },
-
   content: {
     color: theme.colors.onTertiary,
   },
-
   spacer: {
     flex: 1,
   },
-
   actionGroup: {
     flexDirection: "row",
-
     alignItems: "center",
   },
-
   Counter: {
     fontSize: 14,
-
     marginLeft: -4,
-
-    marginRight: 10, // Espacio entre contador y siguiente icono
-
+    marginRight: 10,
     color: theme.colors.onTertiary,
   },
 });

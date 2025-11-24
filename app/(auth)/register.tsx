@@ -1,45 +1,67 @@
 import CustomButton from "@/components/UI/CustomButtom";
 import CustomText from "@/components/UI/CustomText";
 import PasswordInput from "@/components/UI/PasswordInput";
+import { useRegister } from "@/hooks/useRegister"; // 👈 Importamos el nuevo hook
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
 import { TextInput } from "react-native-paper";
+import { RegisterPayload } from "./../../types/User"; // 👈 Importamos la interfaz del payload
 import useLoginStyles from "./login.styles";
 
-export default function Login() {
+export default function RegisterScreen() {
+  // Renombré a RegisterScreen para claridad
+  // 🟢 ESTADOS ADICIONALES REQUERIDOS POR LA API
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  // 🟢 ESTADOS EXISTENTES
   const [email, setEmail] = useState("");
-  const [password, setPasword] = useState("");
+  const [password, setPassword] = useState(""); // Corregido el nombre de la variable
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const [confirmPassword, setConfirmPasword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // Corregido
   const [confirmSecureTextEntry, setConfirmSecureTextEntry] = useState(true);
 
   const styles = useLoginStyles();
   const router = useRouter();
 
-  function goToHome() {
-    router.push("/(app)/home");
-  }
+  // 🟢 HOOK DE MUTACIÓN
+  const registerMutation = useRegister();
+
+  // --- HANDLERS (Simplificados) ---
+  const handlePassword = (pass: string) => setPassword(pass);
+  const handleSecureText = (secureText: boolean) =>
+    setSecureTextEntry(secureText);
+  const handleConfirmPassword = (pass: string) => setConfirmPassword(pass);
+  const handleConfirmSecureText = (secureText: boolean) =>
+    setConfirmSecureTextEntry(secureText);
 
   function goToLogin() {
     router.push("/login");
   }
 
-  function handlePassword(pass: string) {
-    setPasword(pass);
+  // 🟢 FUNCIÓN PRINCIPAL DE REGISTRO
+  function handleRegister() {
+    if (password !== confirmPassword) {
+      alert("Las contraseñas no coinciden.");
+      return;
+    }
+    // Añadir más validación (email vacío, etc.)
+    if (!firstName || !lastName || !email || !password) {
+      alert("Por favor, complete todos los campos.");
+      return;
+    }
+
+    const payload: RegisterPayload = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim(),
+      password: password,
+    };
+
+    registerMutation.mutate(payload);
   }
 
-  function handleSecureText(secureText: boolean) {
-    setSecureTextEntry(secureText);
-  }
-
-  function handleConfirmPassword(pass: string) {
-    setConfirmPasword(pass);
-  }
-
-  function handleConfirmSecureText(secureText: boolean) {
-    setConfirmSecureTextEntry(secureText);
-  }
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -48,6 +70,39 @@ export default function Login() {
         </CustomText>
       </View>
       <View style={styles.registerModal}>
+        {/* 1. CAMPOS DE NOMBRE (NUEVOS REQUERIDOS POR LA API) */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            gap: 10,
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <CustomText variant="labelLarge" style={styles.modalText}>
+              Nombre
+            </CustomText>
+            <TextInput
+              mode="outlined"
+              value={firstName}
+              onChangeText={setFirstName}
+              style={styles.input}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <CustomText variant="labelLarge" style={styles.modalText}>
+              Apellido
+            </CustomText>
+            <TextInput
+              mode="outlined"
+              value={lastName}
+              onChangeText={setLastName}
+              style={styles.input}
+            />
+          </View>
+        </View>
+
+        {/* 2. CORREO ELECTRÓNICO */}
         <View>
           <CustomText variant="labelLarge" style={styles.modalText}>
             Correo Electrónico
@@ -56,11 +111,14 @@ export default function Login() {
             mode="outlined"
             placeholder="ej: john.doe@mail.com"
             value={email}
-            onChangeText={(email) => setEmail(email)}
+            onChangeText={setEmail}
             style={styles.input}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
         </View>
 
+        {/* 3. CONTRASEÑA */}
         <View>
           <CustomText variant="labelLarge" style={styles.modalText}>
             Contraseña
@@ -72,6 +130,8 @@ export default function Login() {
             onSecureTextEntry={handleSecureText}
           />
         </View>
+
+        {/* 4. CONFIRMAR CONTRASEÑA */}
         <View>
           <CustomText variant="labelLarge" style={styles.modalText}>
             Confirmar Contraseña
@@ -83,15 +143,22 @@ export default function Login() {
             onSecureTextEntry={handleConfirmSecureText}
           />
         </View>
+
+        {/* 5. BOTÓN DE REGISTRO PRINCIPAL */}
         <View style={styles.btnContainer}>
           <CustomButton
-            mode="outlined"
-            textColor="#000"
+            mode="contained"
+            buttonColor={registerMutation.isPending ? "#ccc" : "#007BFF"}
+            textColor="#fff"
             style={styles.btnGeneral}
-            onPress={goToHome}
+            onPress={handleRegister} // 👈 Llamada a la mutación
+            loading={registerMutation.isPending}
+            disabled={registerMutation.isPending}
           >
-            Iniciar Sesión
+            Registrarse
           </CustomButton>
+
+          {/* ... Separador y Botón de Google ... */}
           <CustomText variant="labelLarge" style={styles.modalText}>
             O
           </CustomText>
@@ -101,11 +168,13 @@ export default function Login() {
             buttonColor="#007BFF"
             textColor="#fff"
             style={styles.btnGeneral}
-            onPress={goToHome}
+            onPress={() => console.log("Google Auth")}
           >
             Continuar con Google
           </CustomButton>
         </View>
+
+        {/* 6. PIE DE PÁGINA */}
         <View style={styles.footerContainer}>
           <CustomText variant="bodySmall" style={styles.modalText}>
             ¿Ya tienes una cuenta?

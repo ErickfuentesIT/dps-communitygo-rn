@@ -6,6 +6,7 @@ import { tokenStorage } from "./../utils/tokenStorage";
 interface AuthState {
   user: UserProfile | null;
   isAuthenticated: boolean;
+  userId: string | null; // ✅ NUEVO: Acceso directo al ID para filtrado
   setUser: (user: UserProfile) => void;
   logout: () => void;
 }
@@ -13,11 +14,21 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
+  userId: null, // ✅ Inicializamos el ID como nulo
 
-  setUser: (user) => set({ user, isAuthenticated: true }),
+  setUser: (user) =>
+    set({
+      user,
+      isAuthenticated: true,
+      userId: user.id, // ✅ Asignamos el ID del perfil aquí
+    }),
 
   logout: async () => {
     await tokenStorage.clearTokens(); // Borra tokens físicos
-    set({ user: null, isAuthenticated: false }); // Borra estado en memoria
+    set({
+      user: null,
+      isAuthenticated: false,
+      userId: null, // ✅ Limpiamos el ID al hacer logout
+    });
   },
 }));

@@ -159,7 +159,7 @@ export default function CreateEventScreen() {
 
       {/* DETALLES (lo mapeamos a captions) */}
       <TextInput
-        label="Detalles evento (se mostrará como texto corto)"
+        label="Detalles evento"
         value={details}
         textColor={paperTheme.colors.onTertiary}
         onChangeText={setDetails}
