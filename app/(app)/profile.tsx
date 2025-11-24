@@ -1,127 +1,15 @@
+import { useAuthStore } from "@/store/useAuthStore";
 import { theme } from "@/styles/theme";
-import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
   Alert,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { Avatar, Button, Divider, Text, useTheme } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function ProfileScreen() {
-  const theme = useTheme();
-  const router = useRouter();
-  const [userImage, setUserImage] = useState<string | null>(null);
-  const userData = {
-    name: "Juan Perez",
-    joinDate: "01/02/2025",
-    email: "john.doe@domain.com",
-    password: "••••••",
-  };
-
-  // --- Función para subir/cambiar imagen ---
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setUserImage(result.assets[0].uri);
-      // Aquí deberías llamar a tu API para subir la foto real
-    }
-  };
-
-  const handleLogout = () => {
-    Alert.alert("Cerrar Sesión", "¿Estás seguro?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Salir",
-        style: "destructive",
-        onPress: () => router.replace("/(auth)/login"),
-      },
-    ]);
-  };
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text
-            variant="titleLarge"
-            style={{ color: theme.colors.primary, fontWeight: "bold" }}
-          >
-            ComunityGo
-          </Text>
-        </View>
-
-        {/* 2. Sección de Avatar y Nombre */}
-        <View style={styles.profileHeader}>
-          <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
-            {/* Si hay imagen, la muestra. Si no, muestra un icono por defecto */}
-            {userImage ? (
-              <Avatar.Image size={120} source={{ uri: userImage }} />
-            ) : (
-              <Avatar.Icon
-                size={120}
-                icon="account"
-                style={{ backgroundColor: theme.colors.primary }}
-              />
-            )}
-
-            <View
-              style={[
-                styles.editBadge,
-                { backgroundColor: theme.colors.elevation.level3 },
-              ]}
-            >
-              <Avatar.Icon
-                size={30}
-                icon="camera"
-                style={{ backgroundColor: "transparent" }}
-                color={theme.colors.onSurface}
-              />
-            </View>
-          </TouchableOpacity>
-
-          <Text variant="headlineMedium" style={styles.nameText}>
-            {userData.name}
-          </Text>
-        </View>
-
-        <Divider style={styles.divider} />
-
-        {/* 3. Lista de Información (Datos del mock-up) */}
-        <View style={styles.infoSection}>
-          <InfoItem label="Creación de cuenta" value={userData.joinDate} />
-          <InfoItem label="Correo electrónico" value={userData.email} />
-          <InfoItem label="Contraseña" value={userData.password} isPassword />
-        </View>
-
-        <Divider style={styles.divider} />
-
-        {/* 5. Botón de Cerrar Sesión */}
-        <Button
-          mode="outlined"
-          textColor={theme.colors.error}
-          style={styles.logoutButton}
-          onPress={handleLogout}
-          icon="logout"
-        >
-          Cerrar Sesión
-        </Button>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-// Componente auxiliar para los items de información (DRY)
 const InfoItem = ({
   label,
   value,
@@ -146,13 +34,102 @@ const InfoItem = ({
         {value}
       </Text>
       {isPassword && (
-        <Button mode="text" compact onPress={() => console.log("Cambiar pass")}>
+        <Button mode="text" compact disabled>
           Cambiar
         </Button>
       )}
     </View>
   </View>
 );
+
+export default function ProfileScreen() {
+  const paperTheme = useTheme();
+  const { user, logout } = useAuthStore(
+    (state) => ({
+      user: state.user,
+      logout: state.logout,
+    }),
+    shallow
+  );
+  console.log(user);
+  if (!user) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text>Error: No se pudieron cargar los datos del usuario.</Text>
+      </SafeAreaView>
+    );
+  }
+  const displayName =
+    user.firstName && user.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user.userName || "Usuario";
+  const profileDetails = {
+    name: displayName,
+    joinDate: user.createdAt
+      ? new Date(user.createdAt).toLocaleDateString("es-ES")
+      : "N/A",
+    email: user.email,
+    password: "••••••",
+  };
+  const handleLogout = () => {
+    Alert.alert("Cerrar Sesión", "¿Estás seguro?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Salir",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+        },
+      },
+    ]);
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <Text
+            variant="titleLarge"
+            style={{ color: paperTheme.colors.primary, fontWeight: "bold" }}
+          >
+            ComunityGo
+          </Text>
+        </View>
+        <View className="profileHeader" style={styles.profileHeader}>
+          <Avatar.Icon
+            size={120}
+            icon="account"
+            style={{ backgroundColor: paperTheme.colors.primary }}
+          />
+          <Text variant="headlineMedium" style={styles.nameText}>
+            {profileDetails.name}
+          </Text>
+        </View>
+        <Divider style={styles.divider} />
+        <View style={styles.infoSection}>
+          <InfoItem label="Fecha de registro" value={profileDetails.joinDate} />
+          <InfoItem label="Correo electrónico" value={profileDetails.email} />
+          <InfoItem
+            label="Contraseña"
+            value={profileDetails.password}
+            isPassword
+          />
+        </View>
+        <Divider style={styles.divider} />
+        <Button
+          mode="outlined"
+          textColor={paperTheme.colors.error}
+          style={styles.logoutButton}
+          onPress={handleLogout}
+          icon="logout"
+        >
+          Cerrar Sesión
+        </Button>
+      </ScrollView>
+    </SafeAreaView>
+  );
+  // return <Text>Perfil mínimo</Text>;
+}
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
@@ -165,24 +142,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 20,
   },
-  avatarContainer: {
-    position: "relative",
-  },
-  editBadge: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "white", // O el color de fondo
-  },
   nameText: {
     marginTop: 16,
     fontWeight: "bold",
   },
   infoSection: {
     padding: 20,
-    gap: 20, // Espacio entre items
+    gap: 20,
   },
   infoItem: {
     marginBottom: 5,

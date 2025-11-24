@@ -10,7 +10,7 @@ interface EventsState {
   addEvent: (event: EventSummary) => void;
   toggleLike: (eventId: string) => void;
   toggleBookmark: (eventId: string) => void;
-
+  toggleAttendance: (eventId: string) => void;
   fetchEvents: () => Promise<void>;
 }
 
@@ -73,4 +73,28 @@ export const useEventsStore = create<EventsState>((set) => ({
       set({ events: [] });
     }
   },
+  toggleAttendance: (eventId: string) =>
+    set(
+      (state) => ({
+        events: state.events.map((event) => {
+          // 1. Encontrar el evento
+          if (event.id === eventId) {
+            // 2. Determinar el nuevo estado
+            const newIsAttending = !event.isAttendingByCurrentUser;
+
+            return {
+              ...event,
+              // 3. Voltear el estado de asistencia
+              isAttendingByCurrentUser: newIsAttending,
+              // 4. Actualizar el contador total de asistentes
+              attendanceCount: newIsAttending
+                ? event.attendanceCount + 1
+                : event.attendanceCount - 1,
+            };
+          }
+          return event;
+        }),
+      }),
+      false
+    ), // ✅ El argumento 'false' (merge) es el último requerido.
 }));

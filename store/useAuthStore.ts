@@ -1,14 +1,14 @@
 // store/useAuthStore.ts
 import { UserProfile } from "@/types/User";
+import { tokenStorage } from "@/utils/tokenStorage";
 import { create } from "zustand";
-import { tokenStorage } from "./../utils/tokenStorage";
 
 interface AuthState {
   user: UserProfile | null;
   isAuthenticated: boolean;
-  userId: string | null; // ✅ NUEVO: Acceso directo al ID para filtrado
+  userId: string | null;
   setUser: (user: UserProfile) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({

@@ -21,7 +21,9 @@ export interface EventSummary {
   likesCount: number;
   isLikedByCurrentUser: boolean;
   isBookmarkedByCurrentUser: boolean;
-
+  // ✅ AÑADE ESTOS CAMPOS FALTANTES
+  attendanceCount: number;
+  isAttendingByCurrentUser: boolean;
   creator: Creator;
 }
 

@@ -9,10 +9,10 @@ import {
   useTheme,
 } from "react-native-paper";
 
+import { useToggleAttendance } from "@/hooks/useSocial";
 import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
-
 import { formatEventDateTime } from "./../assets/functions/formatIsoToString";
 import { useEventsStore } from "./../store/useEventStore"; // 👈 Store de Eventos (nuevo nombre)
 
@@ -38,6 +38,7 @@ export default function PostDetailScreen() {
   const theme = useTheme();
   // ... otros estados y hooks ...
   const [newComment, setNewComment] = useState("");
+  const { mutate: toggleAttendanceApi, isPending } = useToggleAttendance();
 
   // Acciones del Store (Añadir comentario) - Tendrías que definirla en tu store.
   // const addComment = useEventsStore((state) => state.addComment);
@@ -95,6 +96,8 @@ export default function PostDetailScreen() {
     comments, // Nuevo campo (solo disponible en fullEvent)
     imageUrl,
     likesCount, // Ahora se lee directamente
+    isAttendingByCurrentUser,
+    attendanceCount,
     isLikedByCurrentUser, // Ahora se lee directamente
     // Los campos 'address' y 'captions' solo están disponibles en 'fullEvent'
   } = eventToShow;
@@ -113,15 +116,14 @@ export default function PostDetailScreen() {
     // 2. Limpiar el campo.
     setNewComment("");
   };
-  // Los campos de interacción
-  const isAttending = false; // Asume false hasta que la API lo diga
-  const attendanceCount = 0; // Asume 0 hasta que la API lo diga
+  // 2. Manejador de RSVP
+  const handleRSVP = () => {
+    // La mutación se encarga de llamar a la API y actualizar el store
+    toggleAttendanceApi(id);
+  };
 
-  // const handleRSVP = () => {
-  //   toggleAttendance(id);
-  //   // Aquí también llamarías a la API con una mutación
-  // };
-
+  const isAttending = summaryEvent?.isAttendingByCurrentUser;
+  const currentAttendanceCount = summaryEvent?.attendanceCount;
   return (
     <ScrollView style={styles.container}>
       <Header />
@@ -144,7 +146,7 @@ export default function PostDetailScreen() {
           />
           <MetaItem
             icon="account-multiple"
-            text={`${attendanceCount} personas van`}
+            text={`${currentAttendanceCount} personas van`}
           />
         </View>
         {/* Fila: fecha + hora */}
@@ -172,14 +174,14 @@ export default function PostDetailScreen() {
         <View style={styles.actionRow}>
           <Button
             mode="contained"
+            onPress={handleRSVP} // 👈 Llamamos al hook
             icon={isAttending ? "check-circle" : "account-check-outline"}
-            disabled={isLoading}
+            disabled={isLoading || isPending} // 👈 Deshabilitado durante la carga o mutación
             buttonColor={isAttending ? "green" : theme.colors.primary}
             contentStyle={styles.buttonContent}
             style={styles.actionButton}
-            // onPress={handleRSVP}
           >
-            {isAttending ? "Asistencia marcada" : "Marcar asistencia"}
+            {isAttending ? "Asistencia Marcada" : "Marcar asistencia"}
           </Button>
 
           {/* Icono de persona (como en el mock) */}

@@ -1,4 +1,4 @@
-import { useToggleLike } from "@/hooks/useSocial";
+import { useToggleBookmark, useToggleLike } from "@/hooks/useSocial";
 import { Link } from "expo-router";
 import React from "react";
 import { StyleSheet, View } from "react-native";
@@ -7,7 +7,6 @@ import { Avatar, Card, Text } from "react-native-paper";
 import CustomIconButtom from "@/components/UI/CustomIconButtom";
 import { theme } from "@/styles/theme";
 import { EventSummary } from "@/types/Event";
-import { useEventsStore } from "./../../store/useEventStore";
 import CustomText from "./CustomText";
 
 interface PostCardProps {
@@ -15,9 +14,8 @@ interface PostCardProps {
 }
 
 function PostCard({ event }: PostCardProps) {
-  const toggleBookmark = useEventsStore((state) => state.toggleBookmark);
   const { mutate: toggleLikeApi } = useToggleLike();
-
+  const { mutate: toggleBookmark } = useToggleBookmark();
   const {
     id,
     title,

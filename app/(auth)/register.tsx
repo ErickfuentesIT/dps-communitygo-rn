@@ -42,10 +42,6 @@ export default function RegisterScreen() {
 
   // 🟢 FUNCIÓN PRINCIPAL DE REGISTRO
   function handleRegister() {
-    if (password !== confirmPassword) {
-      alert("Las contraseñas no coinciden.");
-      return;
-    }
     // Añadir más validación (email vacío, etc.)
     if (!firstName || !lastName || !email || !password) {
       alert("Por favor, complete todos los campos.");
@@ -70,39 +66,6 @@ export default function RegisterScreen() {
         </CustomText>
       </View>
       <View style={styles.registerModal}>
-        {/* 1. CAMPOS DE NOMBRE (NUEVOS REQUERIDOS POR LA API) */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            gap: 10,
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <CustomText variant="labelLarge" style={styles.modalText}>
-              Nombre
-            </CustomText>
-            <TextInput
-              mode="outlined"
-              value={firstName}
-              onChangeText={setFirstName}
-              style={styles.input}
-            />
-          </View>
-          <View style={{ flex: 1 }}>
-            <CustomText variant="labelLarge" style={styles.modalText}>
-              Apellido
-            </CustomText>
-            <TextInput
-              mode="outlined"
-              value={lastName}
-              onChangeText={setLastName}
-              style={styles.input}
-            />
-          </View>
-        </View>
-
-        {/* 2. CORREO ELECTRÓNICO */}
         <View>
           <CustomText variant="labelLarge" style={styles.modalText}>
             Correo Electrónico
@@ -116,10 +79,24 @@ export default function RegisterScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
           />
-        </View>
-
-        {/* 3. CONTRASEÑA */}
-        <View>
+          <CustomText variant="labelLarge" style={styles.modalText}>
+            Nombre
+          </CustomText>
+          <TextInput
+            mode="outlined"
+            value={firstName}
+            onChangeText={setFirstName}
+            style={styles.input}
+          />
+          <CustomText variant="labelLarge" style={styles.modalText}>
+            Apellido
+          </CustomText>
+          <TextInput
+            mode="outlined"
+            value={lastName}
+            onChangeText={setLastName}
+            style={styles.input}
+          />
           <CustomText variant="labelLarge" style={styles.modalText}>
             Contraseña
           </CustomText>
@@ -131,19 +108,6 @@ export default function RegisterScreen() {
           />
         </View>
 
-        {/* 4. CONFIRMAR CONTRASEÑA */}
-        <View>
-          <CustomText variant="labelLarge" style={styles.modalText}>
-            Confirmar Contraseña
-          </CustomText>
-          <PasswordInput
-            password={confirmPassword}
-            onPassword={handleConfirmPassword}
-            secureTextEntry={confirmSecureTextEntry}
-            onSecureTextEntry={handleConfirmSecureText}
-          />
-        </View>
-
         {/* 5. BOTÓN DE REGISTRO PRINCIPAL */}
         <View style={styles.btnContainer}>
           <CustomButton
@@ -151,7 +115,7 @@ export default function RegisterScreen() {
             buttonColor={registerMutation.isPending ? "#ccc" : "#007BFF"}
             textColor="#fff"
             style={styles.btnGeneral}
-            onPress={handleRegister} // 👈 Llamada a la mutación
+            onPress={handleRegister}
             loading={registerMutation.isPending}
             disabled={registerMutation.isPending}
           >

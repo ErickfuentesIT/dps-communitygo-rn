@@ -1,7 +1,8 @@
+import { useAuthStore } from "@/store/useAuthStore";
 import { useUIStore } from "@/store/useUIStore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Tabs, usePathname, useRouter } from "expo-router";
+import { Redirect, Tabs, usePathname, useRouter } from "expo-router";
 import React from "react";
 import { AnimatedFAB, Portal, useTheme } from "react-native-paper";
 import useHomeStyles from "./../../styles/home.styles";
@@ -13,11 +14,16 @@ export default function AppLayout() {
   const pathname = usePathname();
   const isFabExtended = useUIStore((state) => state.isFabExtended);
   const setIsCreatingEvent = useUIStore((state) => state.setIsCreatingEvent);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const styles = useHomeStyles();
 
+  // 🔒 Si NO está autenticado, mándalo al login
+  if (!isAuthenticated) {
+    return <Redirect href="/(auth)/login" />;
+  }
   const isFabVisible =
     pathname.includes("events") || pathname.includes("/home");
 
-  const styles = useHomeStyles();
   const onCrearEvento = () => {
     router.push("/create-event");
     setIsCreatingEvent(true);
