@@ -1,5 +1,6 @@
-import { useAuthStore } from "@/store/useAuthStore";
+import CustomButton from "@/components/UI/CustomButtom";
 import { theme } from "@/styles/theme";
+import { router } from "expo-router";
 import React from "react";
 import {
   Alert,
@@ -9,6 +10,9 @@ import {
   View,
 } from "react-native";
 import { Avatar, Button, Divider, Text, useTheme } from "react-native-paper";
+
+// 🔹 Elimina este import mientras pruebas
+// import { useAuthStore } from "@/store/useAuthStore";
 
 const InfoItem = ({
   label,
@@ -44,25 +48,28 @@ const InfoItem = ({
 
 export default function ProfileScreen() {
   const paperTheme = useTheme();
-  const { user, logout } = useAuthStore(
-    (state) => ({
-      user: state.user,
-      logout: state.logout,
-    }),
-    shallow
-  );
-  console.log(user);
-  if (!user) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text>Error: No se pudieron cargar los datos del usuario.</Text>
-      </SafeAreaView>
-    );
-  }
+
+  // 🔹 Datos “quemados” para pruebas
+  const user = {
+    firstName: "Juan",
+    lastName: "Pérez",
+    userName: "juanp",
+    email: "juan.perez@example.com",
+    createdAt: "2024-06-01T00:00:00.000Z",
+  };
+
+  const isAuthenticated = true; // solo por si lo necesitas en otro lado
+
+  // Simulación de logout sin store
+  const logout = async () => {
+    console.log("Logout simulado (sin Zustand)");
+  };
+
   const displayName =
     user.firstName && user.lastName
       ? `${user.firstName} ${user.lastName}`
       : user.userName || "Usuario";
+
   const profileDetails = {
     name: displayName,
     joinDate: user.createdAt
@@ -71,6 +78,7 @@ export default function ProfileScreen() {
     email: user.email,
     password: "••••••",
   };
+
   const handleLogout = () => {
     Alert.alert("Cerrar Sesión", "¿Estás seguro?", [
       { text: "Cancelar", style: "cancel" },
@@ -79,6 +87,7 @@ export default function ProfileScreen() {
         style: "destructive",
         onPress: async () => {
           await logout();
+          router.replace("/(auth)/login");
         },
       },
     ]);
@@ -116,19 +125,16 @@ export default function ProfileScreen() {
           />
         </View>
         <Divider style={styles.divider} />
-        <Button
-          mode="outlined"
+        <CustomButton
           textColor={paperTheme.colors.error}
           style={styles.logoutButton}
           onPress={handleLogout}
-          icon="logout"
         >
-          Cerrar Sesión
-        </Button>
+          Iniciar Sesión
+        </CustomButton>
       </ScrollView>
     </SafeAreaView>
   );
-  // return <Text>Perfil mínimo</Text>;
 }
 
 const styles = StyleSheet.create({

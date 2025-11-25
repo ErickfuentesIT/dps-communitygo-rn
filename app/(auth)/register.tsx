@@ -1,50 +1,64 @@
+// app/(auth)/register.tsx
 import CustomButton from "@/components/UI/CustomButtom";
 import CustomText from "@/components/UI/CustomText";
 import PasswordInput from "@/components/UI/PasswordInput";
-import { useRegister } from "@/hooks/useRegister"; // 👈 Importamos el nuevo hook
+import { useLogin } from "@/hooks/useLogin"; // Hook de Login (para el onSuccess de Google)
+import { useRegister } from "@/hooks/useRegister";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { View } from "react-native";
+import React, { useState } from "react";
+import { Alert, View } from "react-native";
 import { TextInput } from "react-native-paper";
-import { RegisterPayload } from "./../../types/User"; // 👈 Importamos la interfaz del payload
+import { RegisterPayload, UserProfile } from "./../../types/User"; // Asumimos la interfaz del payload
 import useLoginStyles from "./login.styles";
+// Nuevos imports para Google Auth
+import client from "@/utils/client";
+import { tokenStorage } from "@/utils/tokenStorage";
+import * as AuthSession from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
 
 export default function RegisterScreen() {
-  // Renombré a RegisterScreen para claridad
-  // 🟢 ESTADOS ADICIONALES REQUERIDOS POR LA API
+  // 🟢 ESTADOS DE FORMULARIO
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-
-  // 🟢 ESTADOS EXISTENTES
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // Corregido el nombre de la variable
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Estados de seguridad (para el icono del ojo)
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const [confirmPassword, setConfirmPassword] = useState(""); // Corregido
   const [confirmSecureTextEntry, setConfirmSecureTextEntry] = useState(true);
 
   const styles = useLoginStyles();
   const router = useRouter();
 
-  // 🟢 HOOK DE MUTACIÓN
+  // 🟢 HOOKS DE MUTACIÓN
   const registerMutation = useRegister();
+  const loginMutation = useLogin(); // Necesario para el onSuccess de Google
 
-  // --- HANDLERS (Simplificados) ---
+  // Llama a esto al inicio del componente por seguridad (Google Auth)
+  WebBrowser.maybeCompleteAuthSession();
+
+  // --- HANDLERS ---
   const handlePassword = (pass: string) => setPassword(pass);
   const handleSecureText = (secureText: boolean) =>
     setSecureTextEntry(secureText);
   const handleConfirmPassword = (pass: string) => setConfirmPassword(pass);
-  const handleConfirmSecureText = (secureText: boolean) =>
-    setConfirmSecureTextEntry(secureText);
+  // const handleConfirmSecureText = (secureText: boolean) => setConfirmSecureTextEntry(secureText); // Esta línea es redundante y se puede eliminar
 
   function goToLogin() {
     router.push("/login");
   }
 
-  // 🟢 FUNCIÓN PRINCIPAL DE REGISTRO
+  // 🟢 FUNCIÓN PRINCIPAL DE REGISTRO (CON VALIDACIÓN SIMPLE)
   function handleRegister() {
-    // Añadir más validación (email vacío, etc.)
-    if (!firstName || !lastName || !email || !password) {
-      alert("Por favor, complete todos los campos.");
+    // 1. Validación de campos vacíos
+    if (
+      !firstName.trim() ||
+      !lastName.trim() ||
+      !email.trim() ||
+      !password.trim()
+    ) {
+      Alert.alert("Error", "Por favor, complete todos los campos.");
       return;
     }
 
@@ -58,6 +72,47 @@ export default function RegisterScreen() {
     registerMutation.mutate(payload);
   }
 
+  // 🟢 FUNCIÓN DE INICIO DE SESIÓN CON GOOGLE (NUEVO)
+  const handleGoogleSignIn = async () => {
+    const redirectUri = AuthSession.makeRedirectUri({
+      useProxy: true,
+      path: "auth/google/callback",
+    });
+
+    // Asumimos que el cliente Axios tiene la baseURL bien configurada
+    const BACKEND_GOOGLE_LOGIN_URL = `${client.defaults.baseURL}/auth/google/login`;
+    const authUrl = `${BACKEND_GOOGLE_LOGIN_URL}?redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}`;
+    console.log("URL de autenticación generada:", authUrl);
+    const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+
+    if (result.type === "success" && result.url) {
+      const url = new URL(result.url);
+      const accessToken = url.searchParams.get("accessToken");
+      const refreshToken = url.searchParams.get("refreshToken");
+
+      if (accessToken && refreshToken) {
+        // 🛑 LÓGICA CRUCIAL: Reemplazar loginMutation.onSuccess
+        try {
+          // 🛑 LÓGICA DE ON SUCCESS MANUAL (Igual que en useLogin)
+          await tokenStorage.setTokens(accessToken, refreshToken);
+          const profileResponse = await client.get<UserProfile>(
+            "/users/profile"
+          );
+          setUser(profileResponse.data);
+          router.replace("/(app)");
+        } catch (error) {
+          console.error("Falla al guardar tokens o perfil:", error);
+          await tokenStorage.clearTokens(); // Limpiar si falló el perfil
+          Alert.alert("Error", "No se pudo obtener el perfil del usuario.");
+        }
+        return;
+      }
+    }
+    Alert.alert("Error", "Inicio de sesión con Google fallido.");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -66,19 +121,17 @@ export default function RegisterScreen() {
         </CustomText>
       </View>
       <View style={styles.registerModal}>
+        {/* CAMPOS DE NOMBRE Y APELLIDO (Usamos View para Flexbox) */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            gap: 10,
+          }}
+        ></View>
+
+        {/* CONTRASEÑA */}
         <View>
-          <CustomText variant="labelLarge" style={styles.modalText}>
-            Correo Electrónico
-          </CustomText>
-          <TextInput
-            mode="outlined"
-            placeholder="ej: john.doe@mail.com"
-            value={email}
-            onChangeText={setEmail}
-            style={styles.input}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
           <CustomText variant="labelLarge" style={styles.modalText}>
             Nombre
           </CustomText>
@@ -98,6 +151,18 @@ export default function RegisterScreen() {
             style={styles.input}
           />
           <CustomText variant="labelLarge" style={styles.modalText}>
+            Correo Electrónico
+          </CustomText>
+          <TextInput
+            mode="outlined"
+            placeholder="ej: john.doe@mail.com"
+            value={email}
+            onChangeText={setEmail}
+            style={styles.input}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <CustomText variant="labelLarge" style={styles.modalText}>
             Contraseña
           </CustomText>
           <PasswordInput
@@ -115,24 +180,27 @@ export default function RegisterScreen() {
             buttonColor={registerMutation.isPending ? "#ccc" : "#007BFF"}
             textColor="#fff"
             style={styles.btnGeneral}
-            onPress={handleRegister}
+            onPress={handleRegister} // 👈 Registro tradicional
             loading={registerMutation.isPending}
-            disabled={registerMutation.isPending}
+            disabled={registerMutation.isPending || loginMutation.isPending}
           >
             Registrarse
           </CustomButton>
 
-          {/* ... Separador y Botón de Google ... */}
           <CustomText variant="labelLarge" style={styles.modalText}>
             O
           </CustomText>
+
+          {/* BOTÓN DE GOOGLE */}
           <CustomButton
             icon="google"
             mode="contained"
             buttonColor="#007BFF"
             textColor="#fff"
             style={styles.btnGeneral}
-            onPress={() => console.log("Google Auth")}
+            onPress={handleGoogleSignIn} // 👈 Registro con Google
+            loading={loginMutation.isPending}
+            disabled={registerMutation.isPending || loginMutation.isPending}
           >
             Continuar con Google
           </CustomButton>
@@ -154,4 +222,7 @@ export default function RegisterScreen() {
       </View>
     </View>
   );
+}
+function setUser(data: UserProfile) {
+  throw new Error("Function not implemented.");
 }
